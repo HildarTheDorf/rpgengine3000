@@ -1,17 +1,26 @@
-CC=gcc
-CFLAGS=-Wall -Werror -pedantic -std=c99 -g
-LDFLAGS=
-SOURCES=main.c
-OBJECTS=$(SOURCES:.c=.o)
-EXECUTABLE=rpg
+include Makefile.inc
 
-all : $(SOURCES) $(EXECUTABLE)
+DIR1	= rpgplayer
+DIRS    = $(DIR1)
+EXE1	= rpg
+EXE2	= creator
+OBJS1	= rpg.o
 
-$(EXECUTABLE): $(OBJECTS) 
-	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
+all : $(EXE1)
 
-.c.o:
-	$(CC) $(CFLAGS) -c $< -o $@
+$(EXE1) : $(OBJS1)
+	$(ECHO) $(LD) $(OBJS1) -o $(EXE1)
+	$(LD) $(DIR1)/$(OBJS1) -o $(EXE1)
+
+$(OBJS1) : force_look
+	$(ECHO) looking into subdir $(DIR1): $(MAKE) $(MFLAGS)
+	cd $(DIR1); $(MAKE) $(MFLAGS)
+	$(ECHO) Returning to top level
 
 clean :
-	rm *.o rpg
+	$(ECHO) cleaning up in .
+	-$(RM) -f $(EXE1) $(EXE2) $(OBJS1)
+	cd $(DIR1); $(MAKE) clean
+
+force_look :
+	true
