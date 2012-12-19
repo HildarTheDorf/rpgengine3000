@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static const unsigned float FILES_VERSION = 0.0;
+static const float FILES_VERSION = 0.0;
 static const unsigned short LARGEST_NAME = 32;
 static const unsigned short LARGEST_DATA = 256;
 

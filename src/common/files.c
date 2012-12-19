@@ -18,12 +18,16 @@ struct datastruct * readfile(FILE *gamefile)
     }
 
     struct datastruct *Data = malloc(sizeof(struct datastruct));
+    if (Data == NULL)
+        return NULL;
 
     char *tmp = calloc(LARGEST_NAME, sizeof(char));
+    if (tmp == NULL)
+        return NULL;
 
     fscanf(gamefile, "%s = %f\n", tmp, &Data->BuiltWith);
     if (strcmp(tmp, "BuiltWith")) {
-        printf("Game file invalid or corrupt %s %f\n", tmp, Data->BuiltWith);
+        puts("Game file invalid or corrupt\n");
         free(tmp);
         free(Data);
         return NULL;
