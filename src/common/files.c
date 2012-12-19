@@ -21,25 +21,27 @@ struct datastruct * readfile(FILE *gamefile)
     if (Data == NULL)
         return NULL;
 
-    char *tmp = calloc(LARGEST_NAME, sizeof(char));
-    if (tmp == NULL)
-        return NULL;
+    char line[LARGEST_LINE];
+    char *value;
 
-    fscanf(gamefile, "%s = %f\n", tmp, &Data->BuiltWith);
-    if (strcmp(tmp, "BuiltWith")) {
+    // Get a line from the file, find the first = sign and convert it to a NULL char. Value is a pointer to the first char after the =.
+    fgets(line, sizeof(line), gamefile);
+    value = (strchr(line, '='));
+    *(value++) = '\0';
+
+    if (strcmp(line, "BuiltWith")) {
         puts("Game file invalid or corrupt\n");
-        free(tmp);
         free(Data);
         return NULL;
     }
+
+    Data->BuiltWith = atof(value);
 
     if (Data->BuiltWith > FILES_VERSION) {
         printf("\nERROR: Game file too new, created with version %f\nPlease update the program.\n\n", Data->BuiltWith);
         free(Data);
-        free(tmp);
         return NULL;
     }
 
-    free(tmp);
     return Data;
 }

@@ -1,7 +1,7 @@
 #include "rpg.h"
 #include "../common/files.h"
 
-static FILE * init(char*);
+static struct datastruct * init(char*);
 static int cleanup(struct datastruct *);
 
 int main(int argc, char *argv[])
@@ -14,24 +14,14 @@ int main(int argc, char *argv[])
         return EXIT_ARGUMENTS;
     }
 
-    FILE *gamefile = init(argv[1]);
+    struct datastruct *Data  = init(argv[1]);
 
-    if (gamefile == NULL)
-        return EXIT_NOGAMEFILE;
-
-    struct datastruct *Data = readfile(gamefile);
-    fclose(gamefile);
-
-    if (Data == NULL) {
-        return EXIT_INVALIDGAMEFILE;
-    }
-
-    printf("Load succesful!\nGame: %s\nCreator: %s\nVersion: %.1f\nBuilt with rpgcreator version: %.1f\n", "NYI", "NYI", 0.0, Data->BuiltWith);
+    printf("Load succesful!\nGame: %s\nCreator: %s\nVersion: %.1f\nBuilt with rpgcreator3000 version: %.1f\n", "NYI", "NYI", 0.0, Data->BuiltWith);
 
     return cleanup(Data);    
 }
 
-static FILE * init(char* filename)
+static struct datastruct * init(char* filename)
 {
     printf("Loading game file %s...\n", filename);
 
@@ -39,7 +29,7 @@ static FILE * init(char* filename)
 
     if (gamefile == NULL) {
         printf("Game file %s not found.\n", filename);
-        return NULL;
+        exit(EXIT_NOGAMEFILE);
     }
 
     char magic[5] = "\0\0\0\0\0";
@@ -52,7 +42,15 @@ static FILE * init(char* filename)
         return NULL;
     }
 
-    return gamefile;
+    struct datastruct *Data = readfile(gamefile);
+    fclose(gamefile);
+
+    if (Data == NULL) {
+        exit(EXIT_INVALIDGAMEFILE);
+    }
+
+
+    return Data;
 }
 
 static int cleanup(struct datastruct *Data)
