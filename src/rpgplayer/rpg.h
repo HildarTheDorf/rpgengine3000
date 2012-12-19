@@ -6,9 +6,7 @@
 #define EXIT_INVALIDGAMEFILE 3
 #define EXIT_OOM 255
 
-static const float PLAYER_VERSION = 0.0;
-
-static const char MAGIC[] = "GEW\n";
+static const unsigned float PLAYER_VERSION = 0.0;
 
 #include <stdlib.h>
 #include <stdio.h>

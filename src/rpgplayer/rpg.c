@@ -6,6 +6,7 @@ static int cleanup(struct datastruct *);
 
 int main(int argc, char *argv[])
 {
+    system("clear");
     printf("rpgengine3000 version %.1f\nThis product is free software released under the GPL v3\nFor more information see the file COPYING\n\n", PLAYER_VERSION);
 
     if (argc == 1) {
@@ -13,23 +14,21 @@ int main(int argc, char *argv[])
         return EXIT_ARGUMENTS;
     }
 
-    char *filename = argv[1];
-
     FILE *gamefile = init(argv[1]);
 
     if (gamefile == NULL)
         return EXIT_NOGAMEFILE;
 
-    struct datastruct *data = readfile(gamefile);
+    struct datastruct *Data = readfile(gamefile);
     fclose(gamefile);
 
-    if (data == NULL) {
+    if (Data == NULL) {
         return EXIT_INVALIDGAMEFILE;
     }
 
-    printf("Game file %s loaded. This game was built with rpgcreator3000 version %.1f\n\n", filename, 0.0);
+    printf("Load succesful!\nGame: %s\nCreator: %s\nVersion: %.1f\nBuilt with rpgcreator version: %.1f\n", "NYI", "NYI", 0.0, Data->BuiltWith);
 
-    return cleanup(data);    
+    return cleanup(Data);    
 }
 
 static FILE * init(char* filename)
@@ -56,8 +55,8 @@ static FILE * init(char* filename)
     return gamefile;
 }
 
-static int cleanup(struct datastruct *data)
+static int cleanup(struct datastruct *Data)
 {
-    free(data);
+    free(Data);
     return EXIT_SUCCESS;
 }
