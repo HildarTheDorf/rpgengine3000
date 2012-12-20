@@ -10,8 +10,8 @@ OBJSC   = files.o
 all : $(EXE1)
 
 $(EXE1) : $(OBJS1) $(OBJSC)
-	$(ECHO) $(LD) $(OBJS1) $(OBJSC) -o $(EXE1)
-	$(LD) $(DIR1)/$(OBJS1) $(DIRC)/$(OBJSC) -o $(EXE1)
+	$(ECHO) $(LD) $(OBJS1) $(OBJSC) -o $(EXE1) $(LDFLAGS)
+	$(LD) $(DIR1)/$(OBJS1) $(DIRC)/$(OBJSC) -o $(EXE1) $(LDFLAGS)
 
 $(OBJS1) : force_look
 	$(ECHO) looking into subdir $(DIR1): $(MAKE) $(MFLAGS)

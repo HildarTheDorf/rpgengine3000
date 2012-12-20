@@ -11,6 +11,5 @@ static const float PLAYER_VERSION = 0.0;
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "bits.h"
 
 #endif
