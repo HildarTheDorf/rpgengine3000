@@ -1,15 +1,13 @@
-#ifndef RPG_H
-#define RPG_H
+#ifndef RPG3000_RPG_H
+#define RPG3000_RPG_H
 
-#define EXIT_ARGUMENTS 1
-#define EXIT_NOGAMEFILE 2
-#define EXIT_INVALIDGAMEFILE 3
-#define EXIT_OOM 255
+#include "../common.h"
 
 static const float PLAYER_VERSION = 0.0;
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+static struct datastruct * init(char*);
+static void cleanup(int, struct datastruct *);
+static void clearScreen(void);
+
 
 #endif

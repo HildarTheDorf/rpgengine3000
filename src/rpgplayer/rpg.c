@@ -1,9 +1,4 @@
 #include "rpg.h"
-#include "../common/files.h"
-
-static struct datastruct * init(char*);
-static int cleanup(struct datastruct *);
-static void clearScreen(void);
 
 int main(int argc, char *argv[])
 {
@@ -12,14 +7,18 @@ int main(int argc, char *argv[])
 
     if (argc == 1) {
         printf("Error: insufficent arguments\nUsage: %s gamefile\n\n", argv[0]);
-        return EXIT_ARGUMENTS;
+        cleanup(EXIT_ARGUMENTS, NULL);
     }
 
     struct datastruct *Data  = init(argv[1]);
+    if (Data == NULL)
+        cleanup(EXIT_INVALIDGAMEFILE, NULL);
 
-    printf("Load succesful!\nGame: %s\nCreator: %s\nVersion: %.1f\nBuilt with rpgcreator3000 version: %.1f\n", "NYI", "NYI", 0.0, Data->BuiltWith);
+    printf("Load succesful!\n\nTitle: %sCreator: %sVersion: %.1f\nBuilt with rpgcreator3000 version: %.1f\nDescription:\n%s\n", Data->Title, Data->Creator, Data->Version, Data->BuiltWith, Data->Description);
 
-    return cleanup(Data);    
+    cleanup(EXIT_SUCCESS, Data);
+
+    return EXIT_NEVEROCCUR; //This should never occur!
 }
 
 static struct datastruct * init(char* filename)
@@ -30,7 +29,7 @@ static struct datastruct * init(char* filename)
 
     if (gamefile == NULL) {
         printf("Game file %s not found.\n", filename);
-        exit(EXIT_NOGAMEFILE);
+        cleanup(EXIT_NOGAMEFILE, NULL);
     }
 
     char magic[5] = "\0\0\0\0\0";
@@ -40,7 +39,7 @@ static struct datastruct * init(char* filename)
     if (ret != 4 || strcmp(magic, MAGIC)) {
         printf("Game file %s invalid or corrupt\n", filename);
         fclose(gamefile);
-        return NULL;
+        cleanup(EXIT_INVALIDGAMEFILE, NULL);
     }
 
     struct datastruct *Data = readfile(gamefile);
@@ -50,14 +49,14 @@ static struct datastruct * init(char* filename)
         exit(EXIT_INVALIDGAMEFILE);
     }
 
-
     return Data;
 }
 
-static int cleanup(struct datastruct *Data)
+static void cleanup(int exitstatus, struct datastruct *Data)
 {
-    free(Data);
-    return EXIT_SUCCESS;
+    if (Data != NULL)
+        free(Data);
+    exit(exitstatus);
 }
 
 static void clearScreen(void)
