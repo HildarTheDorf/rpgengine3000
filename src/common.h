@@ -26,5 +26,4 @@ static const char MAGIC[] = "GEW\n";
 
 struct datastruct * readfile(FILE *);
 
-
 #endif
