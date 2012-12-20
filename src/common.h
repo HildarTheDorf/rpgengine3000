@@ -7,8 +7,8 @@
 #define EXIT_ARGUMENTS 1
 #define EXIT_NOGAMEFILE 2
 #define EXIT_INVALIDGAMEFILE 3
-#define EXIT_NEVEROCCUR 254
-#define EXIT_OOM 255
+#define EXIT_OOM 254
+#define EXIT_NEVEROCCUR 255
 
 #define LARGEST_NAME 32
 #define LARGEST_DATA 256
@@ -22,7 +22,9 @@ struct datastruct {
     char Description[LARGEST_DATA];    
 };
 
-struct datastruct * readfile(FILE *);
 static const char MAGIC[] = "GEW\n";
+
+struct datastruct * readfile(FILE *);
+
 
 #endif

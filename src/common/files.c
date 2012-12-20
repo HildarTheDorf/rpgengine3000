@@ -16,20 +16,28 @@ struct datastruct * readfile(FILE *gamefile)
         puts("Game file invalid or corrupt\n");
         return NULL;
     }
-    // Gogo main data structure
+    // Let's create the main data structure
     struct datastruct *Data = malloc(sizeof(struct datastruct));
-    if (Data == NULL) //If this happens, PANIC AND GET OUT OF HERE!
+    // If malloc fails, PANIC!
+    // We can't just return NULL since it will be assumed the file is invalid.
+    // And if there's no heap left, there's little sane we can continue to do anyway!
+    if (Data == NULL) { 
+        printf("\n***CRITICAL ERROR: Could not allocate memory!***\n");
+#       ifdef _WIN32
+            getchar();
+#       endif
         exit(EXIT_OOM);
+    }
 
-    char line[LARGEST_LINE];
-    line[0] = '\0';
+    char name[LARGEST_LINE];
+    name[0] = '\0';
     char *value = NULL;
     // Check the BuiltWith value and ensure we aren't opening a version with unknown format.
     // This means BuiltWith MUST be the 2nd line, directly after the magic number
     // There is no restriction on what order other lines come.
-    value = getDataLine(gamefile, line, value);
+    value = getDataLine(gamefile, name, value);
 
-    if (strcmp(line, "BuiltWith")) {
+    if (strcmp(name, "BuiltWith")) {
         puts("Game file invalid or corrupt\n");
         free(Data);
         return NULL;
@@ -42,17 +50,17 @@ struct datastruct * readfile(FILE *gamefile)
         free(Data);
         return NULL;
     }
-    // Keep going over the lines and pushing them into the appropriate places.
+    // Keep going over the lines and placing the data into the appropriate places.
     while (value != NULL) {
-        value = getDataLine(gamefile, line, value);
+        value = getDataLine(gamefile, name, value);
 
-        if (!strcmp(line, "Creator"))
+        if (!strcmp(name, "Creator"))
             strncpy(Data->Creator, value, LARGEST_DATA * sizeof(char));
-        if (!strcmp(line, "Title"))
+        if (!strcmp(name, "Title"))
             strncpy(Data->Title, value, LARGEST_DATA * sizeof(char));
-        if (!strcmp(line, "Description"))
+        if (!strcmp(name, "Description"))
             strncpy(Data->Description, value, LARGEST_DATA * sizeof(char));
-        if (!strcmp(line, "Version"))
+        if (!strcmp(name, "Version"))
             Data->Version = atof(value);
     }
 
@@ -62,8 +70,9 @@ struct datastruct * readfile(FILE *gamefile)
 static char * getDataLine(FILE *gamefile, char *line, char *value)
 {
     // Get a line from the file, find the first = sign and convert it to a NULL char. Return is a pointer to the first char after the =.
+    if (fgets(line, LARGEST_LINE * sizeof(char), gamefile) == NULL)
+        return NULL;
     value = NULL;
-    fgets(line, LARGEST_LINE * sizeof(char), gamefile);
     value = (strchr(line, '='));
     if (value == NULL)
         return NULL;

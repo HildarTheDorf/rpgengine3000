@@ -11,14 +11,16 @@ int main(int argc, char *argv[])
     }
 
     struct datastruct *Data  = init(argv[1]);
+
     if (Data == NULL)
         cleanup(EXIT_INVALIDGAMEFILE, NULL);
 
-    printf("Load succesful!\n\nTitle: %sCreator: %sVersion: %.1f\nBuilt with rpgcreator3000 version: %.1f\nDescription:\n%s\n", Data->Title, Data->Creator, Data->Version, Data->BuiltWith, Data->Description);
+    printf("Load succesful!\n\nTitle: %sCreator: %sVersion: %.1f\nBuilt with rpgcreator3000 version: %.1f\nDescription:\n%s\n",
+        Data->Title, Data->Creator, Data->Version, Data->BuiltWith, Data->Description);
 
     cleanup(EXIT_SUCCESS, Data);
 
-    return EXIT_NEVEROCCUR; //This should never occur!
+    return EXIT_NEVEROCCUR; // This should never occur! ^^
 }
 
 static struct datastruct * init(char* filename)
@@ -46,7 +48,7 @@ static struct datastruct * init(char* filename)
     fclose(gamefile);
 
     if (Data == NULL) {
-        exit(EXIT_INVALIDGAMEFILE);
+        cleanup(EXIT_INVALIDGAMEFILE, NULL);
     }
 
     return Data;
@@ -54,8 +56,14 @@ static struct datastruct * init(char* filename)
 
 static void cleanup(int exitstatus, struct datastruct *Data)
 {
-    if (Data != NULL)
+    if (Data != NULL) 
         free(Data);
+
+#   ifdef _WIN32
+        puts("Press any key to continue...");
+        getchar();
+#   endif
+
     exit(exitstatus);
 }
 
@@ -63,53 +71,41 @@ static void clearScreen(void)
 {
 #if defined _WIN32
 
-/* Untested! */
-#include <windows.h>
+#   pragma message "Windows Support is untested!"
+#   include <windows.h>
+    HANDLE hStdOut;
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    DWORD count;
+    DWORD cellCount;
+    COORD homeCoords = {0, 0};
 
-void ClearScreen()
-  {
-  HANDLE                     hStdOut;
-  CONSOLE_SCREEN_BUFFER_INFO csbi;
-  DWORD                      count;
-  DWORD                      cellCount;
-  COORD                      homeCoords = { 0, 0 };
+    hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hStdOut == INVALID_HANDLE_VALUE)
+        return;
 
-  hStdOut = GetStdHandle( STD_OUTPUT_HANDLE );
-  if (hStdOut == INVALID_HANDLE_VALUE) return;
+    /* Get the number of cells in the current buffer */
+    if (!GetConsoleScreenBufferInfo(hStdOut, &csbi))
+        return;
+    cellCount = csbi.dwSize.X *csbi.dwSize.Y;
 
-  /* Get the number of cells in the current buffer */
-  if (!GetConsoleScreenBufferInfo( hStdOut, &csbi )) return;
-  cellCount = csbi.dwSize.X *csbi.dwSize.Y;
+    /* Fill the entire buffer with spaces */
+    if (!FillConsoleOutputCharacter(hStdOut, (TCHAR)' ', cellCount, homeCoords, &count))
+        return;
 
-  /* Fill the entire buffer with spaces */
-  if (!FillConsoleOutputCharacter(
-    hStdOut,
-    (TCHAR) ' ',
-    cellCount,
-    homeCoords,
-    &count
-    )) return;
+    /* Fill the entire buffer with the current colors and attributes */
+    if (!FillConsoleOutputAttribute(hStdOut, csbi.wAttributes, cellCount, homeCoords, &count))
+        return;
 
-  /* Fill the entire buffer with the current colors and attributes */
-  if (!FillConsoleOutputAttribute(
-    hStdOut,
-    csbi.wAttributes,
-    cellCount,
-    homeCoords,
-    &count
-    )) return;
-
-  /* Move the cursor home */
-  SetConsoleCursorPosition( hStdOut, homeCoords );
-  }
-#elif defined __linux__ || defined TARGET_OS_MAC
+    /* Move the cursor home */
+    SetConsoleCursorPosition(hStdOut, homeCoords);
+#elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
 
     /* Use ANSI terminal escapes to move cursor to top left and wipe the screen,  */
     /* Windows are you even trying? */
     printf("\033[H\033[2J");
 
 #else
-    #error "Unknown Platform. Please compile on Linux, MacOS X or Windows."
+#   error "Unknown Platform. Please compile on a unix compatible system, MacOS X or Windows."
 #endif
     return;
 }
