@@ -3,6 +3,7 @@
 
 # Executables
 *.out
+*.exe
 rpg
 
 # Editor files
@@ -10,3 +11,7 @@ rpg
 
 # Backup files
 *.tar.gz
+
+# IDE "Project" files
+*.dev
+*.win

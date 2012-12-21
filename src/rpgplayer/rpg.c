@@ -1,4 +1,7 @@
 #include "rpg.h"
+#ifdef _WIN32
+#   include <windows.h>
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -26,7 +29,7 @@ int main(int argc, char *argv[])
 static struct datastruct * init(char* filename)
 {
     printf("Loading game file %s\n", filename);
-
+    
     FILE *gamefile = fopen(filename, "r");
 
     if (gamefile == NULL) {
@@ -70,10 +73,49 @@ static void cleanup(int exitstatus, struct datastruct *Data)
 static void clearScreen(void)
 {
 #ifdef _WIN32
-    // Windows' use of system(), considered harmful.
-    system("CLS");
+    /* Standard error macro for reporting API errors */
+    #define PERR(bSuccess, api){if(!(bSuccess)) printf("%s:Error %d from %s \
+    on line %d\n", __FILE__, GetLastError(), api, __LINE__);}
+    
+    COORD coordScreen = { 0, 0 };    /* here's where we'll home the cursor */
+    HANDLE hConsole;
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    BOOL bSuccess;
+    DWORD cCharsWritten;
+    CONSOLE_SCREEN_BUFFER_INFO csbi; /* to get buffer info */
+    DWORD dwConSize;                 /* number of character cells in
+                                        the current buffer */
+
+    /* get the number of character cells in the current buffer */
+
+    bSuccess = GetConsoleScreenBufferInfo( hConsole, &csbi );
+    PERR( bSuccess, "GetConsoleScreenBufferInfo" );
+    dwConSize = csbi.dwSize.X * csbi.dwSize.Y;
+
+    /* fill the entire screen with blanks */
+
+    bSuccess = FillConsoleOutputCharacter( hConsole, (TCHAR) ' ',
+       dwConSize, coordScreen, &cCharsWritten );
+    PERR( bSuccess, "FillConsoleOutputCharacter" );
+
+    /* get the current text attribute */
+
+    bSuccess = GetConsoleScreenBufferInfo( hConsole, &csbi );
+    PERR( bSuccess, "ConsoleScreenBufferInfo" );
+
+    /* now set the buffer's attributes accordingly */
+
+    bSuccess = FillConsoleOutputAttribute( hConsole, csbi.wAttributes,
+       dwConSize, coordScreen, &cCharsWritten );
+    PERR( bSuccess, "FillConsoleOutputAttribute" );
+
+    /* put the cursor at (0, 0) */
+
+    bSuccess = SetConsoleCursorPosition( hConsole, coordScreen );
+    PERR( bSuccess, "SetConsoleCursorPosition" );
 #elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
     // Use ANSI terminal escapes to move cursor to top left and wipe the screen
+    // Windows, are you even trying?
     puts("\033[H\033[2J");
 #else
 #   error "Please compile on windows or a POSIX compliant system."
