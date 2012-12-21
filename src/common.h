@@ -14,12 +14,16 @@
 #define LARGEST_DATA 256
 static const unsigned short LARGEST_LINE = LARGEST_NAME + LARGEST_DATA + 3; //name + '=' + data + '\n' + '\0'
 
+#define LARGEST_ATTRIB_NUM 6
+
 struct datastruct {
     float BuiltWith;
     float Version;
     char Creator[LARGEST_DATA];
     char Title[LARGEST_DATA];
-    char Description[LARGEST_DATA];    
+    char Description[LARGEST_DATA];
+    short unsigned NumAttributes;
+    char Attributes[LARGEST_ATTRIB_NUM][LARGEST_DATA];
 };
 
 static const char MAGIC[] = "GEW\n";

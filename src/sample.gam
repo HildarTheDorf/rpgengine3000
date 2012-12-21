@@ -4,4 +4,13 @@ Creator=Xv8
 Title=Sample Game
 Description=A simple game to showcase the features of rpgcreator3000.
 Version=0.1
+Attributes=6
+{
+Strength
+Agility
+Constitution
+Intellect
+Wisdom
+Charisma
+}
 

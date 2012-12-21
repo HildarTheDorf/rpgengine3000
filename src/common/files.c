@@ -22,7 +22,7 @@ struct datastruct * readfile(FILE *gamefile)
     // We can't just return NULL since it will be assumed the file is invalid.
     // And if there's no heap left, there's little sane we can continue to do anyway!
     if (Data == NULL) { 
-        printf("\n***CRITICAL ERROR: Could not allocate memory!***\n");
+        puts("\n***CRITICAL ERROR: Could not allocate memory!***\n");
 #       ifdef _WIN32
             getchar();
 #       endif
@@ -50,6 +50,7 @@ struct datastruct * readfile(FILE *gamefile)
         free(Data);
         return NULL;
     }
+
     // Keep going over the lines and placing the data into the appropriate places.
     while (value != NULL) {
         value = getDataLine(gamefile, name, value);
@@ -62,6 +63,27 @@ struct datastruct * readfile(FILE *gamefile)
             strncpy(Data->Description, value, LARGEST_DATA * sizeof(char));
         if (!strcmp(name, "Version"))
             Data->Version = atof(value);
+        if (!strcmp(name, "Attributes")) {
+            if (sscanf(value, "%hu", &Data->NumAttributes) != 1) {
+                free(Data);
+                return NULL;
+            }
+            for (short i = 0; i < Data->NumAttributes; ++i) {
+                switch (getAttributeLine(gamefile, name)) {
+                case (LINE_ERROR) :
+                    free(Data);
+                    return NULL;
+                case (LINE_START) :
+                    --i;
+                    break;
+                case (LINE_END) :
+                    i = LARGEST_ATTRIB_NUM + 1;
+                    break;
+                case (LINE_SUCCESS) :
+                    strcpy(Data->Attributes[i], name);
+                }
+            }
+        }
     }
 
     return Data;
@@ -78,4 +100,19 @@ static char * getDataLine(FILE *gamefile, char *line, char *value)
         return NULL;
     *(value++) = '\0';
     return value;
+}
+
+static int getAttributeLine(FILE *gamefile, char *line)
+{
+    // Get a line and remove the final \n
+    if (fgets(line, LARGEST_LINE * sizeof(char), gamefile) == NULL)
+        return LINE_ERROR;
+    if (!strcmp(line, "{\n"))
+        return LINE_START;
+    if (!strcmp(line, "}\n"))
+        return LINE_END;
+    
+    char *end = (strchr(line, '\n'));
+    *end = '\0';
+    return LINE_SUCCESS;
 }

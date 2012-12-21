@@ -21,6 +21,9 @@ int main(int argc, char *argv[])
     printf("Load succesful!\n\nTitle: %sCreator: %sVersion: %.1f\nBuilt with version: %.1f\n\nDescription:\n%s\n",
         Data->Title, Data->Creator, Data->Version, Data->BuiltWith, Data->Description);
 
+    for (short unsigned i = 0; i < Data->NumAttributes; ++i)
+        printf("Attribute %hu: %s\n", i, Data->Attributes[i]);
+
     cleanup(EXIT_SUCCESS, Data);
 
     return EXIT_NEVEROCCUR; // This should never occur! ^^
@@ -73,7 +76,7 @@ static void cleanup(int exitstatus, struct datastruct *Data)
 static void clearScreen(void)
 {
 #ifdef _WIN32
-    /* Standard error macro for reporting API errors */
+    /* Standard error macro for reporting Win32 API errors */
     #define PERR(bSuccess, api){if(!(bSuccess)) printf("%s:Error %d from %s \
     on line %d\n", __FILE__, GetLastError(), api, __LINE__);}
     
@@ -87,7 +90,6 @@ static void clearScreen(void)
                                         the current buffer */
 
     /* get the number of character cells in the current buffer */
-
     bSuccess = GetConsoleScreenBufferInfo( hConsole, &csbi );
     PERR( bSuccess, "GetConsoleScreenBufferInfo" );
     dwConSize = csbi.dwSize.X * csbi.dwSize.Y;
