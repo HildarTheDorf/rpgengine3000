@@ -74,7 +74,7 @@ static void clearScreen(void)
     system("CLS");
 #elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
     // Use ANSI terminal escapes to move cursor to top left and wipe the screen
-    printf("\033[H\033[2J");
+    puts("\033[2J\033[H");
 #else
 #   error "Please compile on windows or a POSIX compliant system."
 #endif
