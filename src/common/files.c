@@ -2,6 +2,7 @@
 
 struct datastruct * readfile(FILE *gamefile)
 {
+    // We should really have already checked for this.
     if (gamefile == NULL)
         return NULL;
 
@@ -18,14 +19,13 @@ struct datastruct * readfile(FILE *gamefile)
     }
     // Let's create the main data structure
     struct datastruct *Data = malloc(sizeof(struct datastruct));
-    // If malloc fails, PANIC!
-    // We can't just return NULL since it will be assumed the file is invalid.
-    // And if there's no heap left, there's little sane we can continue to do anyway!
+    // If malloc fails we can't just return NULL since it will be assumed the file is invalid.
+    // And if there's no heap left, there's a major system-wide error!
+    // Panic.
     if (Data == NULL) { 
         puts("\n***CRITICAL ERROR: Could not allocate memory!***\n");
-#       ifdef _WIN32
+        if (REQUIRE_GETCHAR)
             getchar();
-#       endif
         exit(EXIT_OOM);
     }
 
@@ -65,12 +65,14 @@ struct datastruct * readfile(FILE *gamefile)
             Data->Version = atof(value);
         if (!strcmp(name, "Attributes")) {
             if (sscanf(value, "%hu", &Data->NumAttributes) != 1) {
+                puts("Game file invalid or corrupt\n");
                 free(Data);
                 return NULL;
             }
             for (short i = 0; i < Data->NumAttributes; ++i) {
                 switch (getAttributeLine(gamefile, name)) {
                 case (LINE_ERROR) :
+                    puts("Game file invalid or corrupt\n");
                     free(Data);
                     return NULL;
                 case (LINE_START) :

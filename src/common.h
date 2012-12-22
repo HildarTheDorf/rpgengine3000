@@ -1,20 +1,27 @@
 #ifndef RPG3000_COMMON_H
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
+#ifdef _WIN32
+#   include <windows.h>
+#elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
+#   include <unistd.h>
+#endif
 
 #define EXIT_ARGUMENTS 1
 #define EXIT_NOGAMEFILE 2
 #define EXIT_INVALIDGAMEFILE 3
-#define EXIT_OOM 254
-#define EXIT_NEVEROCCUR 255
+#define EXIT_NOTINTERACTIVE 4
+#define EXIT_OOM 255
 
 #define LARGEST_NAME 32
 #define LARGEST_DATA 256
 static const unsigned short LARGEST_LINE = LARGEST_NAME + LARGEST_DATA + 3; //name + '=' + data + '\n' + '\0'
 
 #define LARGEST_ATTRIB_NUM 6
+
+extern bool REQUIRE_GETCHAR;
 
 struct datastruct {
     float BuiltWith;
