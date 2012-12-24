@@ -2,7 +2,9 @@
 
 int main(int argc, char *argv[])
 {
-    struct datastruct *Data  = init(argc, argv);
+    initGlobal(argc, argv);  //Process the commandline and rexec in a terminal if required.
+    struct datastruct *Data  = smalloc(sizeof(*Data));
+    initData(argv[1], Data); //Open up the datafile and stip it's data.
 
     printf("Load succesful!\n\nTitle: %sCreator: %sVersion: %.1f\nBuilt with version: %.1f\n\nDescription:\n%s\n",
         Data->Title, Data->Creator, Data->Version, Data->BuiltWith, Data->Description);
@@ -13,14 +15,9 @@ int main(int argc, char *argv[])
     return cleanup(EXIT_SUCCESS, Data);
 }
 
-static struct datastruct * init(int argc, char *argv[])
+static void initGlobal(int argc, char *argv[])
 {
 #if defined __unix__ || (defined __APPLE__ && defined __MACH__)
-    // If not running in a tty, exec to a terminal and restart the program (with --no-auto-exit).
-    // Windows kindly opens a terminal for us.
-    if (!isatty(1))
-        spawnTerminal(argc, argv);
-
     // If arguments given in the wrong order, swap them.
     if (argc > 1 && !strcmp(argv[1], "--no-auto-exit")) {
         char *tmp;
@@ -28,6 +25,11 @@ static struct datastruct * init(int argc, char *argv[])
         argv[2] = argv[1];
         argv[1] = tmp;
     }
+    // If not running in a tty, exec to a terminal and restart the program (with --no-auto-exit).
+    // Windows kindly opens a terminal for us.
+    if (!isatty(1))
+        spawnTerminal(argc, argv);
+
     // Check for --no-auto-exit
     if (argc > 2 && (!strcmp(argv[2], "--no-auto-exit")))
         REQUIRE_GETCHAR = true;
@@ -50,20 +52,21 @@ static struct datastruct * init(int argc, char *argv[])
         #endif
 
         cleanup(EXIT_ARGUMENTS, NULL);
+
+        return;
     }
+}
 
-    char *filename = argv[1];
-
+static void initData(char *filename, struct datastruct *Data)
+{
     printf("Loading game file %s\n", filename);
     
     FILE *gamefile = fopen(filename, "r");
 
     if (gamefile == NULL) {
         printf("Game file %s not found.\n", filename);
-        cleanup(EXIT_NOGAMEFILE, NULL);
+        cleanup(EXIT_NOGAMEFILE, Data);
     }
-
-    struct datastruct *Data = smalloc(sizeof(struct datastruct));
 
     int ret = readfile(gamefile, Data);
     fclose(gamefile);
@@ -72,7 +75,7 @@ static struct datastruct * init(int argc, char *argv[])
         cleanup(EXIT_INVALIDGAMEFILE, Data);
     }
 
-    return Data;
+    return;
 }
 
 static int cleanup(int exitstatus, struct datastruct *Data)
@@ -159,7 +162,7 @@ static void spawnTerminal(int argc, char *argv[])
     if (argc == 1)
         argv[1] = "/dev/null";
 
-    // The real value for argmax would be in the millions through sysconf(_SC_ARG_MAX), but we can't trust it fully because it can clobber environment variables.
+    // The real value for arg max would be in the millions through sysconf(_SC_ARG_MAX), but we can't trust it fully because it can clobber environment variables.
     // Halving it is a 'reasonable' failsafe.
     long argmax = sysconf(_SC_ARG_MAX) / 2;
     char commandline[argmax];
@@ -182,8 +185,7 @@ static void spawnTerminal(int argc, char *argv[])
     execlp(term, term, "-e", commandline, NULL);
     // $TERM does not point to a valid terminal, or exec failed. One final attempt to launch one.
     execlp("xterm", "xterm", "-e", commandline, NULL);
-    // $TERM does not point to a valid terminal and xterm is not installed, or we can't exec.
-    // We can't even report this for obvious reasons.
+    // Everything failed. We can't even report this for obvious reasons.
     // Give up.
     exit(EXIT_NOTINTERACTIVE);
 }

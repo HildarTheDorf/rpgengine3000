@@ -108,3 +108,24 @@ static int getAttributeLine(FILE *gamefile, char *line)
     *end = '\0';
     return LINE_SUCCESS;
 }
+/*
+static struct mapnode * initMap(struct datastruct Data)
+{
+    #define SIZE 100000
+    struct mapnode *MapArray[SIZE];
+    for (unsigned short i = 0; i < SIZE; ++i)
+        MapArray[i] = smalloc(sizeof(struct mapnode));
+
+    for (unsigned short i = 0; i < SIZE; ++i) {
+        MapArray[i]->ID = i + 1;
+        for (unsigned short j = 0; j <=EXIT_EXTRA2; ++j)
+            MapArray[i]->Exits[j] = NULL;
+        if (i != 0)
+            MapArray[i]->Exits[EXIT_NORTH] = MapArray[i-1];
+        if (i != SIZE - 1)
+            MapArray[i]->Exits[EXIT_SOUTH] = MapArray[i+1];
+        MapArray[i]->RoomFlags = 0x0;
+    }
+
+    return MapArray[0];
+} */

@@ -1,17 +1,17 @@
 #ifndef RPG3000_COMMON_H
-#   define RPG3000_COMMON_H
-#   include <stdlib.h>
-#   include <stdio.h>
-#   include <string.h>
-#   include <stdbool.h>
-#   ifdef _WIN32
-#       include <windows.h>
-#   elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
-#       define _XOPEN_SOURCE 700
-#       include <unistd.h>
-#   else
-#       error "Please compile for windows or a POSIX compliant system. If you believe this is in error, define _WIN32 or __unix__ as appropriate."
-#   endif
+#define RPG3000_COMMON_H
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#ifdef _WIN32
+#   include <windows.h>
+#elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
+#   define _XOPEN_SOURCE 700
+#   include <unistd.h>
+#else
+#   error "Please compile for windows or a POSIX compliant system. If you believe this is in error, define _WIN32 or __unix__ as appropriate."
+#endif
 
 enum {
     EXIT_ARGUMENTS = 1,
@@ -23,20 +23,64 @@ enum {
     EXIT_OOM = 255,
 };
 
+#define LARGEST_ROOM_NAME 32
+#define LARGEST_ROOM_DESC 256
+#define LARGEST_EXIT_NAME 32
+
+static const unsigned short NORTH_VALID  = 0x01;
+static const unsigned short SOUTH_VALID  = 0x02;
+static const unsigned short EAST_VALID   = 0x04;
+static const unsigned short WEST_VALID   = 0x08;
+static const unsigned short UP_VALID     = 0x10;
+static const unsigned short DOWN_VALID   = 0x20;
+static const unsigned short EXTRA1_VALID = 0x40;
+static const unsigned short EXTRA2_VALID = 0x80;
+
+static const unsigned short ROOM_FLAGS_DARK = 0x01;
+static const unsigned short ROOM_FLAGS_FREE = 0x02;
+
+enum {
+    EXIT_NORTH = 0,
+    EXIT_SOUTH,
+    EXIT_EAST,
+    EXIT_WEST,
+    EXIT_UP,
+    EXIT_DOWN,
+    EXIT_EXTRA1,
+    EXIT_EXTRA2,
+};
+// Change EXIT_MAX if you change the above enum.
+#define EXIT_MAX EXIT_EXTRA2 + 1
+
+// This struct, and the latter datastruct one, have their contents ordered oddly to save space due to alignment.
+// This is an optimization specific to Linux x64, but should be valid on Windows and x86 too.
+// On other systems, it's not a major penalty.
+struct mapnode {
+    char Desc[LARGEST_ROOM_DESC];
+    char ExitName[EXIT_MAX][LARGEST_EXIT_NAME];
+    struct mapnode *Exits[8];
+    char Name[LARGEST_ROOM_NAME];
+    unsigned short ID;
+    unsigned short Validexits;
+    unsigned short RoomFlags;
+};
+
 #define LARGEST_NAME 32
 #define LARGEST_DATA 256
 static const unsigned short LARGEST_LINE = LARGEST_NAME + LARGEST_DATA + 3; //name + '=' + data + '\n' + '\0'
 
-#define LARGEST_ATTRIB_NUM 6
+#define LARGEST_ATTRIB_NUM 13
+#define MAX_MAP_SIZE 4096
 
 struct datastruct {
-    float BuiltWith;
-    float Version;
+    struct mapnode Map[MAX_MAP_SIZE];
+    char Attributes[LARGEST_ATTRIB_NUM][LARGEST_DATA];
     char Creator[LARGEST_DATA];
     char Title[LARGEST_DATA];
     char Description[LARGEST_DATA];
+    float BuiltWith;
+    float Version;
     short unsigned NumAttributes;
-    char Attributes[LARGEST_ATTRIB_NUM][LARGEST_DATA];
 };
 
 extern bool REQUIRE_GETCHAR;
