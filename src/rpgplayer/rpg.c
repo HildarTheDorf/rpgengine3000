@@ -21,19 +21,21 @@ static struct datastruct * init(int argc, char *argv[])
         spawnTerminal(argc, argv);
 #endif
     char *filename = argv[1];
-    if (argc > 2 && !strcmp(argv[2], "y"))
+    if (argc > 2 && !strcmp(argv[2], "--no-auto-exit"))
         REQUIRE_GETCHAR = true;
 
     clearScreen();
     printf("rpgengine3000 version %.1f\nThis product is free software released under the GPL v3\nFor more information see the file COPYING\n\n", PLAYER_VERSION);
 
-    if (argc < 2 || !strcmp(argv[1], "/dev/null") || (argc == 3 && *argv[2] != 'y') || argc > 3) {
+    if (argc < 2 || !strcmp(argv[1], "/dev/null") || (argc == 3 && strcmp(argv[2], "--no-auto-exit")) || argc > 3) {
         #ifdef _WIN32
         char *ptr = strrchr(argv[0], '\\');
+        printf("Error: invalid arguments\nUsage: %s gamefile\n\n", ptr + 1);
         #else
         char *ptr = strrchr(argv[0], '/');
+        printf("Error: invalid arguments\nUsage: %s gamefile [--no-auto-exit]\n\n", ptr + 1);
         #endif
-        printf("Error: invalid arguments\nUsage: %s gamefile\n\n", ptr + 1);
+
         cleanup(EXIT_ARGUMENTS, NULL);
     }
     printf("Loading game file %s\n", filename);
@@ -116,60 +118,56 @@ static void clearScreen(void)
     PERR( bSuccess, "SetConsoleCursorPosition" );
 #elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
     // Use ANSI terminal escapes to move cursor to top left and wipe the screen.
-    // Windows, are you even trying?
     puts("\033[H\033[2J");
-#else
-#   error "Please compile on windows or a POSIX compliant system."
 #endif
     return;
 }
 
 static void spawnTerminal(int argc, char *argv[])
 {
-        // We are not running in a (pseudo-)terminal, let's try to launch one:
-        if (getenv("DISPLAY") == NULL)
-            // We are running as a daemon... WTF?
-            // Panic.
-            exit(EXIT_NOTINTERACTIVE);
-
-        char* term = getenv("TERM");
-        // If we didn't get a TERM, assume xterm for now, we will try others later.
-        if (term == NULL)
-            term = "xterm";
-
-        // Set a clearly wrong file name for argv[1] if we didn't get one.
-        if (argc == 1)
-            argv[1] = "/dev/null";
-
-        // The real value for argmax would be in the millions through sysconf(_SC_ARG_MAX), but we can't trust it because it can clobber environment variables.
-        // So we take the size of a 80*24 terminal.
-        long argmax = 1920;
-        char commandline[argmax];
-
-        // 25 = extra overhead in the commandline for the terminal name, and other overhead characters.
-        if (strlen(argv[0]) + strlen(argv[1]) + 25 > argmax)
-            // We can't fit our arguments into a call for a terminal
-            // Panic.
-            exit(EXIT_ARGUMENTS);
-
-        for (unsigned short i = 0; i < argmax; ++i)
-            commandline[i] = '\0';
-
-        // Make the command line for the new program up.
-        strcpy(&commandline[0], argv[0]);
-        strcpy(strchr(commandline, '\0'), " ");
-        strcpy(strchr(commandline, '\0'), argv[1]);
-        strcpy(strchr(commandline, '\0'), " y");
-
-        // Try some common "pretty" terminals rather than the ugly xterm, which often ends up the 'default'.
-        if (!strcmp(term, "xterm")) {
-            execlp("gnome-terminal", "gnome-terminal", "-e", commandline, NULL);
-            execlp("konsole", "konsole", "-e", commandline, NULL);
-            execlp("urxvt", "urxvt", "-e", commandline, NULL);
-            execlp("rxvt", "rxvt", "-e", commandline, NULL);
-        }
-        execlp(term, term, "-e", commandline, NULL);
-        // $TERM does not point to a valid terminal, or we can't exec for some reason.
-        // Give up.
+    // We are not running in a (pseudo-)terminal, let's try to launch one:
+    if (getenv("DISPLAY") == NULL)
+        // No controlling terminal, and we are not within an X server.
+        // Therefore we are running as a daemon?!
+        // Panic.
         exit(EXIT_NOTINTERACTIVE);
+
+    char* term = getenv("TERM");
+    // If we didn't get a TERM, assume xterm for now, we will try others later.
+    if (term == NULL)
+        term = "xterm";
+
+    // Set a clearly wrong file name for argv[1] if we didn't get one.
+    if (argc == 1)
+        argv[1] = "/dev/null";
+
+    // The real value for argmax would be in the millions through sysconf(_SC_ARG_MAX), but we can't trust it because it can clobber environment variables.
+    // So halve ARG_MAX, or take the size of a 80*24 terminal as a "reasonable" and very conservative estimate. Whichever is larger.
+    long argmax = sysconf(_SC_ARG_MAX) > 1920 ? sysconf(_SC_ARG_MAX) : 1920;
+    char commandline[argmax];
+
+    // 35 = extra overhead in the commandline for the terminal name, and other parts of the (new) command line.
+    if (strlen(argv[0]) + strlen(argv[1]) + 35 > argmax)
+        // We can't fit our extra arguments into a command line.
+        // Panic.
+        exit(EXIT_ARGUMENTS);
+
+    // Make the command line for the new program up. Add --no-auto-exit since the terminal will close on program completion, windows style.
+    strcpy(&commandline[0], argv[0]);
+    strcpy(strchr(commandline, '\0'), " ");
+    strcpy(strchr(commandline, '\0'), argv[1]);
+    strcpy(strchr(commandline, '\0'), " --no-auto-exit\0");
+
+    // Try some common "pretty" terminals rather than the ugly xterm, which often ends up the 'default'.
+    if (!strcmp(term, "xterm")) {
+        execlp("gnome-terminal", "gnome-terminal", "-e", commandline, NULL);
+        execlp("konsole", "konsole", "-e", commandline, NULL);
+        execlp("urxvt", "urxvt", "-e", commandline, NULL);
+    }
+    execlp(term, term, "-e", commandline, NULL);
+    // $TERM does not point to a valid terminal. One final attempt to launch one.
+    execlp("xterm", "xterm", "-e", commandline, NULL);
+    // $TERM does not point to a valid terminal and xterm is not installed, or we can't exec for some reason.
+    // Give up.
+    exit(EXIT_NOTINTERACTIVE);
 }

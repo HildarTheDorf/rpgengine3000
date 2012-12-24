@@ -1,13 +1,17 @@
 #ifndef RPG3000_COMMON_H
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-#ifdef _WIN32
-#   include <windows.h>
-#elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
-#   include <unistd.h>
-#endif
+#define RPG3000_COMMON_H
+#   include <stdlib.h>
+#   include <stdio.h>
+#   include <string.h>
+#   include <stdbool.h>
+#   ifdef _WIN32
+#       include <windows.h>
+#   elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
+#       define _XOPEN_SOURCE 700
+#       include <unistd.h>
+#   else
+#       error "Please compile on windows or a POSIX compliant system. If you believe this is in error, define _WIN32 or __unix__ as appropriate."
+#   endif
 
 #define EXIT_ARGUMENTS 1
 #define EXIT_NOGAMEFILE 2
