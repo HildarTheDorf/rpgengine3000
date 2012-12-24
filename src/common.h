@@ -1,5 +1,5 @@
 #ifndef RPG3000_COMMON_H
-#define RPG3000_COMMON_H
+#   define RPG3000_COMMON_H
 #   include <stdlib.h>
 #   include <stdio.h>
 #   include <string.h>

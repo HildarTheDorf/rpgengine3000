@@ -12,7 +12,7 @@ bool REQUIRE_GETCHAR = false;
 static const float PLAYER_VERSION = 0.0;
 
 static struct datastruct * init(int, char *[]);
-static void cleanup(int, struct datastruct *);
+static int cleanup(int, struct datastruct *);
 static void clearScreen(void);
 static void spawnTerminal(int, char *[]);
 

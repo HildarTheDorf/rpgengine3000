@@ -10,24 +10,37 @@ int main(int argc, char *argv[])
     for (short unsigned i = 0; i < Data->NumAttributes; ++i)
         printf("Attribute %hu: %s\n", i, Data->Attributes[i]);
 
-    cleanup(EXIT_SUCCESS, Data);
-    return EXIT_SUCCESS;
+    return cleanup(EXIT_SUCCESS, Data);
 }
 
 static struct datastruct * init(int argc, char *argv[])
 {
 #if defined __unix__ || (defined __APPLE__ && defined __MACH__)
+    // If not running in a tty, exec to a terminal and restart the program (with --no-auto-exit).
+    // Windows kindly does this for us.
     if (!isatty(1))
         spawnTerminal(argc, argv);
-#endif
-    char *filename = argv[1];
-    if (argc > 2 && !strcmp(argv[2], "--no-auto-exit"))
+
+    // Check for --no-auto-exit
+    if (argc > 2 && (!strcmp(argv[2], "--no-auto-exit")))
         REQUIRE_GETCHAR = true;
+    // If arguments given in the wrong order, swap them.
+    if (argc > 1 && !strcmp(argv[1], "--no-auto-exit")) {
+        char *tmp;
+        tmp = argv[2];
+        argv[2] = argv[1];
+        argv[1] = tmp;
+    }
+#endif
 
     clearScreen();
     printf("rpgengine3000 version %.1f\nThis product is free software released under the GPL v3\nFor more information see the file COPYING\n\n", PLAYER_VERSION);
 
-    if (argc < 2 || !strcmp(argv[1], "/dev/null") || (argc == 3 && strcmp(argv[2], "--no-auto-exit")) || argc > 3) {
+    // Check for, in order:
+    // No arguments, no data file argument, a 'clearly wrong' data file ( from spawnterminal() ), no unknown argv[2], and not too many arguments.
+    if (argc < 2 || argv[1] == NULL || !strcmp(argv[1], "/dev/null") || (argc == 3 && strcmp(argv[2], "--no-auto-exit")) || argc > 3) {
+        // Check for the last instance of / (or \ on windows). The part after that is the executable name.
+        // On windows, don't bother telling the user about --no-auto-exit since it is on by default.
         #ifdef _WIN32
         char *ptr = strrchr(argv[0], '\\');
         printf("Error: invalid arguments\nUsage: %s gamefile\n\n", ptr + 1);
@@ -38,6 +51,9 @@ static struct datastruct * init(int argc, char *argv[])
 
         cleanup(EXIT_ARGUMENTS, NULL);
     }
+
+    char *filename = argv[1];
+
     printf("Loading game file %s\n", filename);
     
     FILE *gamefile = fopen(filename, "r");
@@ -57,7 +73,7 @@ static struct datastruct * init(int argc, char *argv[])
     return Data;
 }
 
-static void cleanup(int exitstatus, struct datastruct *Data)
+static int cleanup(int exitstatus, struct datastruct *Data)
 {
     if (Data != NULL) {
         free(Data);
@@ -69,7 +85,7 @@ static void cleanup(int exitstatus, struct datastruct *Data)
         getchar();
     }
     if (exitstatus == EXIT_SUCCESS)
-        return;
+        return exitstatus;
 
     exit(exitstatus);
 }
@@ -141,9 +157,9 @@ static void spawnTerminal(int argc, char *argv[])
     if (argc == 1)
         argv[1] = "/dev/null";
 
-    // The real value for argmax would be in the millions through sysconf(_SC_ARG_MAX), but we can't trust it because it can clobber environment variables.
-    // So halve ARG_MAX, or take the size of a 80*24 terminal as a "reasonable" and very conservative estimate. Whichever is larger.
-    long argmax = sysconf(_SC_ARG_MAX) > 1920 ? sysconf(_SC_ARG_MAX) : 1920;
+    // The real value for argmax would be in the millions through sysconf(_SC_ARG_MAX), but we can't trust it fully because it can clobber environment variables.
+    // Halving it is a 'reasonable' failsafe.
+    long argmax = sysconf(_SC_ARG_MAX) / 2;
     char commandline[argmax];
 
     // 35 = extra overhead in the commandline for the terminal name, and other parts of the (new) command line.
@@ -165,9 +181,10 @@ static void spawnTerminal(int argc, char *argv[])
         execlp("urxvt", "urxvt", "-e", commandline, NULL);
     }
     execlp(term, term, "-e", commandline, NULL);
-    // $TERM does not point to a valid terminal. One final attempt to launch one.
+    // $TERM does not point to a valid terminal, or exec failed. One final attempt to launch one.
     execlp("xterm", "xterm", "-e", commandline, NULL);
     // $TERM does not point to a valid terminal and xterm is not installed, or we can't exec for some reason.
+    // We can't even report this for obvious reasons.
     // Give up.
     exit(EXIT_NOTINTERACTIVE);
 }

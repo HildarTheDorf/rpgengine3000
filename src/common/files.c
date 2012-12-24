@@ -8,7 +8,6 @@ struct datastruct * readfile(FILE *gamefile)
 
     fseek(gamefile, 0, SEEK_SET);
 
-    // This should really be checked anyway on opening the file. But we want to get back to a sane locaton in the file (4, SEEK_SET) anyway. Can't hurt to double check ^^
     char magic[5] = "\0\0\0\0\0";
     int ret;
     ret = fread(magic, sizeof(char), 4, gamefile);
@@ -34,7 +33,6 @@ struct datastruct * readfile(FILE *gamefile)
     char *value = NULL;
     // Check the BuiltWith value and ensure we aren't opening a version with unknown format.
     // This means BuiltWith MUST be the 2nd line, directly after the magic number
-    // There is no restriction on what order other lines come.
     value = getDataLine(gamefile, name, value);
 
     if (strcmp(name, "BuiltWith")) {
