@@ -13,11 +13,18 @@ static inline int flushchar(char input)
     return 0;
 }
 
-static inline void *smalloc(long unsigned size)
+static inline void *smalloc(size_t size)
 {
     void *pointer = malloc(size);
-    if (pointer == NULL)
+    // If malloc fails there's presumably no heap left.
+    // Therefore there is a major (possibly system-wide) error!
+    // Panic.
+    if (pointer == NULL) { 
+        puts("\n***CRITICAL ERROR: Could not allocate memory!***\n");
+        if (REQUIRE_GETCHAR)
+            getchar();
         exit(EXIT_OOM);
+    }
     return pointer;
 }
 

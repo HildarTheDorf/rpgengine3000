@@ -10,9 +10,11 @@ int readfile(FILE *gamefile, struct datastruct *Data)
 
     fseek(gamefile, 0, SEEK_SET);
 
-    char magic[5] = "\0\0\0\0\0";
+    char magic[5];
     int ret;
     ret = fread(magic, sizeof(char), 4, gamefile);
+    // magic[4] must be a null since fread() doesn't null terminate.
+    magic[4] = '\0';
 
     if (ret != 4 || strcmp(magic, MAGIC)) {
         puts("Game file invalid or corrupt\n");
@@ -20,7 +22,6 @@ int readfile(FILE *gamefile, struct datastruct *Data)
     }
 
     char name[LARGEST_LINE];
-    name[0] = '\0';
     char *value = NULL;
     // Check the BuiltWith value and ensure we aren't opening a version with unknown format.
     // This means BuiltWith MUST be the 2nd line, directly after the magic number

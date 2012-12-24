@@ -2,6 +2,7 @@
 #define RPG3000_RPG_H
 
 #include "../common.h"
+#include "bits.c"
 
 #ifdef _WIN32
 bool REQUIRE_GETCHAR = true;

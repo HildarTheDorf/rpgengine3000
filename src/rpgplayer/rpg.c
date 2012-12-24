@@ -17,13 +17,10 @@ static struct datastruct * init(int argc, char *argv[])
 {
 #if defined __unix__ || (defined __APPLE__ && defined __MACH__)
     // If not running in a tty, exec to a terminal and restart the program (with --no-auto-exit).
-    // Windows kindly does this for us.
+    // Windows kindly opens a terminal for us.
     if (!isatty(1))
         spawnTerminal(argc, argv);
 
-    // Check for --no-auto-exit
-    if (argc > 2 && (!strcmp(argv[2], "--no-auto-exit")))
-        REQUIRE_GETCHAR = true;
     // If arguments given in the wrong order, swap them.
     if (argc > 1 && !strcmp(argv[1], "--no-auto-exit")) {
         char *tmp;
@@ -31,16 +28,19 @@ static struct datastruct * init(int argc, char *argv[])
         argv[2] = argv[1];
         argv[1] = tmp;
     }
+    // Check for --no-auto-exit
+    if (argc > 2 && (!strcmp(argv[2], "--no-auto-exit")))
+        REQUIRE_GETCHAR = true;
 #endif
 
     clearScreen();
     printf("rpgengine3000 version %.1f\nThis product is free software released under the GPL v3\nFor more information see the file COPYING\n\n", PLAYER_VERSION);
 
     // Check for, in order:
-    // No arguments, no data file argument, a 'clearly wrong' data file ( from spawnterminal() ), no unknown argv[2], and not too many arguments.
+    // No arguments, no data file argument, a 'clearly wrong' data file ( from spawnterminal() ), an unknown argv[2], and too many arguments.
     if (argc < 2 || argv[1] == NULL || !strcmp(argv[1], "/dev/null") || (argc == 3 && strcmp(argv[2], "--no-auto-exit")) || argc > 3) {
-        // Check for the last instance of / (or \ on windows). The part after that is the executable name.
-        // On windows, don't bother telling the user about --no-auto-exit since it is on by default.
+        // Check for the last instance of / (or \ on windows) in argv[0]. The part after that is the executable name.
+        // On windows, don't bother telling the user about --no-auto-exit since it is always on.
         #ifdef _WIN32
         char *ptr = strrchr(argv[0], '\\');
         printf("Error: invalid arguments\nUsage: %s gamefile\n\n", ptr + 1);
@@ -63,17 +63,7 @@ static struct datastruct * init(int argc, char *argv[])
         cleanup(EXIT_NOGAMEFILE, NULL);
     }
 
-    // Let's create the main data structure
-    struct datastruct *Data = malloc(sizeof(struct datastruct));
-    // If malloc fails there's no heap left
-    // There's a major (possibly system-wide) error!
-    // Panic.
-    if (Data == NULL) { 
-        puts("\n***CRITICAL ERROR: Could not allocate memory!***\n");
-        if (REQUIRE_GETCHAR)
-            getchar();
-        exit(EXIT_OOM);
-    }
+    struct datastruct *Data = smalloc(sizeof(struct datastruct));
 
     int ret = readfile(gamefile, Data);
     fclose(gamefile);
@@ -192,7 +182,7 @@ static void spawnTerminal(int argc, char *argv[])
     execlp(term, term, "-e", commandline, NULL);
     // $TERM does not point to a valid terminal, or exec failed. One final attempt to launch one.
     execlp("xterm", "xterm", "-e", commandline, NULL);
-    // $TERM does not point to a valid terminal and xterm is not installed, or we can't exec for some reason.
+    // $TERM does not point to a valid terminal and xterm is not installed, or we can't exec.
     // We can't even report this for obvious reasons.
     // Give up.
     exit(EXIT_NOTINTERACTIVE);
