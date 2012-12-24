@@ -13,6 +13,10 @@
 #   error "Please compile for windows or a POSIX compliant system. If you believe this is in error, define _WIN32 or __unix__ as appropriate."
 #endif
 
+#ifndef __GNUC__
+#   define __attribute__(x) /* NOTHING */
+#endif
+
 enum {
     EXIT_ARGUMENTS = 1,
     EXIT_NOGAMEFILE,
@@ -53,16 +57,15 @@ enum {
 #define EXIT_MAX EXIT_EXTRA2 + 1
 
 // This struct, and the latter datastruct one, have their contents ordered oddly to save space due to alignment.
-// This is an optimization specific to Linux x64, but should be valid on Windows and x86 too.
-// On other systems, it's not a major penalty.
+// This is an optimization specific to Linux x64, but should be reasonably valid on most none-estoric systems.
 struct mapnode {
     char Desc[LARGEST_ROOM_DESC];
     char ExitName[EXIT_MAX][LARGEST_EXIT_NAME];
-    struct mapnode *Exits[8];
+    struct mapnode *Exits[EXIT_MAX];
     char Name[LARGEST_ROOM_NAME];
     unsigned short ID;
     unsigned short Validexits;
-    unsigned short RoomFlags;
+    unsigned short Flags;
 };
 
 #define LARGEST_NAME 32

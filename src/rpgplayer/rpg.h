@@ -15,7 +15,7 @@ static void initGlobal(int, char *[]);
 static void initData(char *, struct datastruct *);
 static int cleanup(int, struct datastruct *);
 static void clearScreen(void);
-static void spawnTerminal(int, char *[]);
+static void spawnTerminal(int, char *[]) __attribute__((noreturn));
 
 
 // Flushes stdin to the next line or EOF, whichever comes first.

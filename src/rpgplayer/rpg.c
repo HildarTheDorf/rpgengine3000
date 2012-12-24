@@ -2,9 +2,9 @@
 
 int main(int argc, char *argv[])
 {
-    initGlobal(argc, argv);  //Process the commandline and rexec in a terminal if required.
+    initGlobal(argc, argv);  //Process the commandline and re-exec in a terminal if required.
     struct datastruct *Data  = smalloc(sizeof(*Data));
-    initData(argv[1], Data); //Open up the datafile and stip it's data.
+    initData(argv[1], Data); //Open up the datafile and dump it's data to the Data struct.
 
     printf("Load succesful!\n\nTitle: %sCreator: %sVersion: %.1f\nBuilt with version: %.1f\n\nDescription:\n%s\n",
         Data->Title, Data->Creator, Data->Version, Data->BuiltWith, Data->Description);
