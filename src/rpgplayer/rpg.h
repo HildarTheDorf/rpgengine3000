@@ -5,7 +5,7 @@
 
 #ifdef _WIN32
 bool REQUIRE_GETCHAR = true;
-#elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
+#else
 bool REQUIRE_GETCHAR = false;
 #endif
 

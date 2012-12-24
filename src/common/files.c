@@ -1,10 +1,12 @@
 #include "files.h"
 
-struct datastruct * readfile(FILE *gamefile)
+int readfile(FILE *gamefile, struct datastruct *Data)
 {
-    // We should really have already checked for this.
+    // We should really have already checked for these.
     if (gamefile == NULL)
-        return NULL;
+        return EXIT_NOGAMEFILE;
+    if (Data == NULL)
+        return EXIT_INVALIDPOINTER;
 
     fseek(gamefile, 0, SEEK_SET);
 
@@ -14,18 +16,7 @@ struct datastruct * readfile(FILE *gamefile)
 
     if (ret != 4 || strcmp(magic, MAGIC)) {
         puts("Game file invalid or corrupt\n");
-        return NULL;
-    }
-    // Let's create the main data structure
-    struct datastruct *Data = malloc(sizeof(struct datastruct));
-    // If malloc fails we can't just return NULL since it will be assumed the file is invalid.
-    // And if there's no heap left, there's a major system-wide error!
-    // Panic.
-    if (Data == NULL) { 
-        puts("\n***CRITICAL ERROR: Could not allocate memory!***\n");
-        if (REQUIRE_GETCHAR)
-            getchar();
-        exit(EXIT_OOM);
+        return EXIT_INVALIDGAMEFILE;
     }
 
     char name[LARGEST_LINE];
@@ -38,7 +29,7 @@ struct datastruct * readfile(FILE *gamefile)
     if (strcmp(name, "BuiltWith")) {
         puts("Game file invalid or corrupt\n");
         free(Data);
-        return NULL;
+        return EXIT_INVALIDGAMEFILE;
     }
 
     Data->BuiltWith = atof(value);
@@ -46,7 +37,7 @@ struct datastruct * readfile(FILE *gamefile)
     if (Data->BuiltWith > FILES_VERSION) {
         printf("\nERROR: Game file too new, created with version %f\nPlease update the program.\n\n", Data->BuiltWith);
         free(Data);
-        return NULL;
+        return EXIT_INVALIDGAMEFILE;
     }
 
     // Keep going over the lines and placing the data into the appropriate places.
@@ -65,14 +56,14 @@ struct datastruct * readfile(FILE *gamefile)
             if (sscanf(value, "%hu", &Data->NumAttributes) != 1) {
                 puts("Game file invalid or corrupt\n");
                 free(Data);
-                return NULL;
+                return EXIT_INVALIDGAMEFILE;
             }
             for (short i = 0; i < Data->NumAttributes; ++i) {
                 switch (getAttributeLine(gamefile, name)) {
                 case (LINE_ERROR) :
                     puts("Game file invalid or corrupt\n");
                     free(Data);
-                    return NULL;
+                    return EXIT_INVALIDGAMEFILE;
                 case (LINE_START) :
                     --i;
                     break;
@@ -86,7 +77,7 @@ struct datastruct * readfile(FILE *gamefile)
         }
     }
 
-    return Data;
+    return EXIT_SUCCESS;
 }
 
 static char * getDataLine(FILE *gamefile, char *line, char *value)

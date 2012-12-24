@@ -63,11 +63,23 @@ static struct datastruct * init(int argc, char *argv[])
         cleanup(EXIT_NOGAMEFILE, NULL);
     }
 
-    struct datastruct *Data = readfile(gamefile);
+    // Let's create the main data structure
+    struct datastruct *Data = malloc(sizeof(struct datastruct));
+    // If malloc fails there's no heap left
+    // There's a major (possibly system-wide) error!
+    // Panic.
+    if (Data == NULL) { 
+        puts("\n***CRITICAL ERROR: Could not allocate memory!***\n");
+        if (REQUIRE_GETCHAR)
+            getchar();
+        exit(EXIT_OOM);
+    }
+
+    int ret = readfile(gamefile, Data);
     fclose(gamefile);
 
-    if (Data == NULL) {
-        cleanup(EXIT_INVALIDGAMEFILE, NULL);
+    if (Data == NULL || ret != EXIT_SUCCESS) {
+        cleanup(EXIT_INVALIDGAMEFILE, Data);
     }
 
     return Data;
@@ -169,10 +181,7 @@ static void spawnTerminal(int argc, char *argv[])
         exit(EXIT_ARGUMENTS);
 
     // Make the command line for the new program up. Add --no-auto-exit since the terminal will close on program completion, windows style.
-    strcpy(&commandline[0], argv[0]);
-    strcpy(strchr(commandline, '\0'), " ");
-    strcpy(strchr(commandline, '\0'), argv[1]);
-    strcpy(strchr(commandline, '\0'), " --no-auto-exit\0");
+    sprintf(commandline, "%s %s --no-auto-exit", argv[0], argv[1]);
 
     // Try some common "pretty" terminals rather than the ugly xterm, which often ends up the 'default'.
     if (!strcmp(term, "xterm")) {

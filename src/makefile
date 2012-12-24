@@ -14,12 +14,12 @@ $(EXE1) : $(OBJS1) $(OBJSC)
 	$(LD) $(DIR1)/$(OBJS1) $(DIRC)/$(OBJSC) -o $(EXE1) $(LDFLAGS)
 
 $(OBJS1) : force_look
-	$(ECHO) looking into subdir $(DIR1): $(MAKE) $(MFLAGS)
+	$(ECHO) Looking into subdir $(DIR1): $(MAKE) $(MFLAGS)
 	cd $(DIR1); $(MAKE) $(MFLAGS)
 	$(ECHO) Returning to top level
 
 $(OBJSC) : force_look
-	$(ECHO) looking into subdir $(DIRC): $(MAKE) $(MFLAGS)
+	$(ECHO) Looking into subdir $(DIRC): $(MAKE) $(MFLAGS)
 	cd $(DIRC); $(MAKE) $(MFLAGS)
 	$(ECHO) Returning to top level
 

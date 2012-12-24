@@ -10,22 +10,24 @@
 #       define _XOPEN_SOURCE 700
 #       include <unistd.h>
 #   else
-#       error "Please compile on windows or a POSIX compliant system. If you believe this is in error, define _WIN32 or __unix__ as appropriate."
+#       error "Please compile for windows or a POSIX compliant system. If you believe this is in error, define _WIN32 or __unix__ as appropriate."
 #   endif
 
-#define EXIT_ARGUMENTS 1
-#define EXIT_NOGAMEFILE 2
-#define EXIT_INVALIDGAMEFILE 3
-#define EXIT_NOTINTERACTIVE 4
-#define EXIT_OOM 255
+enum {
+    EXIT_ARGUMENTS = 1,
+    EXIT_NOGAMEFILE,
+    EXIT_INVALIDGAMEFILE,
+    EXIT_NOTINTERACTIVE,
+    EXIT_INVALIDPOINTER,
+
+    EXIT_OOM = 255,
+};
 
 #define LARGEST_NAME 32
 #define LARGEST_DATA 256
 static const unsigned short LARGEST_LINE = LARGEST_NAME + LARGEST_DATA + 3; //name + '=' + data + '\n' + '\0'
 
 #define LARGEST_ATTRIB_NUM 6
-
-extern bool REQUIRE_GETCHAR;
 
 struct datastruct {
     float BuiltWith;
@@ -37,8 +39,10 @@ struct datastruct {
     char Attributes[LARGEST_ATTRIB_NUM][LARGEST_DATA];
 };
 
+extern bool REQUIRE_GETCHAR;
+
 static const char MAGIC[] = "GEW\n";
 
-struct datastruct * readfile(FILE *);
+int readfile(FILE * gamefile, struct datastruct *Data);
 
 #endif
