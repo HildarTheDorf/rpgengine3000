@@ -20,7 +20,6 @@ static struct datastruct * init(int argc, char *argv[])
     if (!isatty(1))
         spawnTerminal(argc, argv);
 #endif
-
     char *filename = argv[1];
     if (argc > 2 && !strcmp(argv[2], "y"))
         REQUIRE_GETCHAR = true;
@@ -116,7 +115,7 @@ static void clearScreen(void)
     bSuccess = SetConsoleCursorPosition( hConsole, coordScreen );
     PERR( bSuccess, "SetConsoleCursorPosition" );
 #elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
-    // Use ANSI terminal escapes to move cursor to top left and wipe the screen
+    // Use ANSI terminal escapes to move cursor to top left and wipe the screen.
     // Windows, are you even trying?
     puts("\033[H\033[2J");
 #else
@@ -129,23 +128,34 @@ static void spawnTerminal(int argc, char *argv[])
 {
         // We are not running in a (pseudo-)terminal, let's try to launch one:
         if (getenv("DISPLAY") == NULL)
-            // We are running as a daemon...
+            // We are running as a daemon... WTF?
             // Panic.
             exit(EXIT_NOTINTERACTIVE);
 
         char* term = getenv("TERM");
-        // If we didn't get a TERM, assume xterm for now, we will try other later
+        // If we didn't get a TERM, assume xterm for now, we will try others later.
         if (term == NULL)
             term = "xterm";
 
-        // Set a clearly wrong file name for argv[1] if we didn't get one
+        // Set a clearly wrong file name for argv[1] if we didn't get one.
         if (argc == 1)
             argv[1] = "/dev/null";
 
-        // Make the command line for the new program up
-        char commandline[4096]; //4096 is the minimum posix max argument length. Most implementations are far larger.
-        for (unsigned short i = 0; i < 4096; ++i)
+        // The real value for argmax would be in the millions through sysconf(_SC_ARG_MAX), but we can't trust it because it can clobber environment variables.
+        // So we take the size of a 80*24 terminal.
+        long argmax = 1920;
+        char commandline[argmax];
+
+        // 25 = extra overhead in the commandline for the terminal name, and other overhead characters.
+        if (strlen(argv[0]) + strlen(argv[1]) + 25 > argmax)
+            // We can't fit our arguments into a call for a terminal
+            // Panic.
+            exit(EXIT_ARGUMENTS);
+
+        for (unsigned short i = 0; i < argmax; ++i)
             commandline[i] = '\0';
+
+        // Make the command line for the new program up.
         strcpy(&commandline[0], argv[0]);
         strcpy(strchr(commandline, '\0'), " ");
         strcpy(strchr(commandline, '\0'), argv[1]);
@@ -154,12 +164,12 @@ static void spawnTerminal(int argc, char *argv[])
         // Try some common "pretty" terminals rather than the ugly xterm, which often ends up the 'default'.
         if (!strcmp(term, "xterm")) {
             execlp("gnome-terminal", "gnome-terminal", "-e", commandline, NULL);
-            execlp("konsole", "konsole", "-e", argv[0], argv[1], "y", NULL);
-            execlp("urxvt", "urxvt", "-e", argv[0], argv[1], "y", NULL);
-            execlp("rxvt", "rxvt", "-e", argv[0], argv[1], "y", NULL);
+            execlp("konsole", "konsole", "-e", commandline, NULL);
+            execlp("urxvt", "urxvt", "-e", commandline, NULL);
+            execlp("rxvt", "rxvt", "-e", commandline, NULL);
         }
-        execlp(term, term, "-e", argv[0], argv[1], "y", NULL);
-        // $TERM does not point to a valid terminal, and no common ones found
-        // Panic.
+        execlp(term, term, "-e", commandline, NULL);
+        // $TERM does not point to a valid terminal, or we can't exec for some reason.
+        // Give up.
         exit(EXIT_NOTINTERACTIVE);
 }
