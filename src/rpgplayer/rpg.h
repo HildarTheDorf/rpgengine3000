@@ -39,7 +39,7 @@ static inline void * smalloc(size_t size)
     // Therefore there is a major (possibly system-wide) error!
     // Panic.
     if (pointer == NULL) { 
-        printf("\n***CRITICAL ERROR: Could not allocate %lu bytes of memory!***\n", (long unsigned)size);
+        printf("\n***CRITICAL ERROR: Could not allocate %zu bytes of memory!***\n", size);
         if (REQUIRE_GETCHAR)
             getchar();
         exit(EXIT_OOM);

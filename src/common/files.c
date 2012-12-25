@@ -9,7 +9,7 @@ int readfile(FILE *gamefile, struct datastruct *Data)
         return EXIT_INVALIDPOINTER;
 
     fseek(gamefile, 0, SEEK_SET);
-
+    // Check for magic number.
     char magic[5];
     int ret;
     ret = fread(magic, sizeof(char), 4, gamefile);
@@ -32,10 +32,11 @@ int readfile(FILE *gamefile, struct datastruct *Data)
 
     if (Data->BuiltWith > FILES_VERSION)
         returnNew();
+
     // Keep going over the lines and placing the data into the appropriate places.
     while (value != NULL) {
         value = getDataLine(gamefile, name, value);
-
+        // Simple text fields.
         if (!strcmp(name, "Creator"))
             strncpy(Data->Creator, value, LARGEST_DATA * sizeof(char));
         if (!strcmp(name, "Title"))
@@ -45,6 +46,7 @@ int readfile(FILE *gamefile, struct datastruct *Data)
         if (!strcmp(name, "Version"))
             Data->Version = atof(value);
 
+        // Names of the character attributes.
         if (!strcmp(name, "Attributes")) {
             if (sscanf(value, "%hu", &Data->NumAttributes) != 1)
                 returnInvalid();
@@ -65,27 +67,24 @@ int readfile(FILE *gamefile, struct datastruct *Data)
                     strcpy(Data->Attributes[i], name);
                 }
             }
+            if (getAttributeLine(gamefile, name) != LINE_END)
+                returnInvalid();
         }
+
+        // The game map.
         if (!strcmp(name, "MapNodes")) {
             short unsigned numnodes;
             if (sscanf(value, "%hu", &numnodes) != 1)
                 returnInvalid();
-
-            for (short unsigned i = 0; i < Data->NumAttributes; ++i) {
-                switch (getNodeLine(gamefile, &Data->Map[i])) {
+            if (strcmp(fgets(name, 3, gamefile), "{\n"))
+                returnInvalid();
+            for (short unsigned i = 0; i < numnodes; ++i) {
+                switch (getNodeLine(gamefile, &Data->Map[i], *Data)) {
                 case (LINE_ERROR) :
                     returnInvalid();
-                case (LINE_START) :
-                    --i;
-                    break;
-                case (LINE_END) :
-                    if (i != numnodes - 1)
-                        returnInvalid();
-                    i = MAX_MAP_SIZE + 1;
-                    break;
                 }
             }
-        }                    
+        }
     }
 
     return EXIT_SUCCESS;
@@ -107,6 +106,8 @@ static char * getDataLine(FILE *gamefile, char *line, char *value)
 static int getAttributeLine(FILE *gamefile, char *line)
 {
     // Get a line and remove the final \n
+    if (getc(gamefile) != '\t')
+        return LINE_ERROR;
     if (fgets(line, LARGEST_LINE * sizeof(char), gamefile) == NULL)
         return LINE_ERROR;
     char *end = (strchr(line, '\n'));
@@ -119,12 +120,28 @@ static int getAttributeLine(FILE *gamefile, char *line)
     return LINE_SUCCESS;
 }
 
-static int getNodeLine(FILE *gamefile, struct mapnode *Node)
+static int getNodeLine(FILE *gamefile, struct mapnode *Node, struct datastruct Data)
 {
     // Take a MapNode line and insert the data into the appropriate places.
-    int ret = fread(Node->Desc, 1, 1, gamefile);
-    if (ret == 4)
+    short unsigned exitID[EXIT_MAX];
+    // Abuse of a scanf format string.
+    char format[256];
+    sprintf(format, "\t%%hu=%%hu,%%hu,%%hu,%%hu,%%hu,%%hu,%%hu,%%hu\n\t%%%d[^\n]\n\t%%%d[^\n]\n\t%%%d[^\n]\n\t%%%d[^\n]\n\t%%hx\n",
+                        LARGEST_ROOM_NAME, LARGEST_ROOM_DESC, LARGEST_EXIT_NAME, LARGEST_EXIT_NAME);
+    int ret = fscanf(gamefile, format,
+                        &Node->ID, &exitID[0], &exitID[1], &exitID[2], &exitID[3], &exitID[4], &exitID[5], &exitID[6], &exitID[7],
+                        Node->Name, Node->Desc, Node->ExitName[0], Node->ExitName[1], &Node->Flags);
+
+    if (ret == 14) {
+        // Convert exits from ID to an actual pointer. Then set ValidExits as appropriate.
+        for (short unsigned i = 0; i < EXIT_MAX; ++i) {
+            if (exitID[i] != INVALID_ROOM) {
+                Node->Exit[i] = &Data.Map[exitID[i]];
+                Node->ValidExits |= (int)pow(2, i);
+            }
+        }
         return LINE_SUCCESS;
+    }
     else
         return LINE_ERROR;
 }

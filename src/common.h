@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <math.h>
 
 #ifndef __GNUC__
 #   define __attribute__(x) /* NOTHING */
@@ -42,7 +43,6 @@ static const unsigned short EXTRA1_VALID = 0x40;
 static const unsigned short EXTRA2_VALID = 0x80;
 
 static const unsigned short ROOM_FLAGS_DARK = 0x01;
-static const unsigned short ROOM_FLAGS_FREE = 0x02;
 
 enum {
     EXIT_NORTH = 0,
@@ -51,21 +51,21 @@ enum {
     EXIT_WEST,
     EXIT_UP,
     EXIT_DOWN,
+    EXIT_EXTRA0,
     EXIT_EXTRA1,
-    EXIT_EXTRA2,
 };
 // Change EXIT_MAX if you change the above enum.
-#define EXIT_MAX EXIT_EXTRA2 + 1
+#define EXIT_MAX EXIT_EXTRA1 + 1
 
 // This struct, and the latter datastruct one, have their contents ordered oddly to save space due to alignment.
 // This is an optimization specific to Linux x64, but should be reasonably valid on most none-estoric systems.
 struct mapnode {
     char Desc[LARGEST_ROOM_DESC];
-    char ExitName[EXIT_MAX][LARGEST_EXIT_NAME];
-    struct mapnode *Exits[EXIT_MAX];
+    char ExitName[EXIT_MAX - 6][LARGEST_EXIT_NAME];
+    struct mapnode *Exit[EXIT_MAX];
     char Name[LARGEST_ROOM_NAME];
     unsigned short ID;
-    unsigned short Validexits;
+    unsigned short ValidExits;
     unsigned short Flags;
 };
 

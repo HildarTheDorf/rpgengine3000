@@ -2,7 +2,7 @@
 CC              = gcc
 PRJCFLAGS       = -Wall -Werror -Wextra -pedantic -std=c99 -g
 LD              = gcc
-LDFLAGS         = 
+LDFLAGS         = -lm
 RM              = rm
 ECHO            = echo
 
