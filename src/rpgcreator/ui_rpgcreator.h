@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'rpgcreator.ui'
 **
-** Created: Tue Dec 25 21:51:04 2012
+** Created: Tue Dec 25 22:04:42 2012
 **      by: Qt User Interface Compiler version 4.8.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!

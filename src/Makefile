@@ -12,12 +12,12 @@ OBJSC   = $(DIRC)/files.o
 all : $(EXE1) $(EXE2)
 
 $(EXE1) : $(OBJS1) $(OBJSC)
-	$(ECHO) $(LD) $(OBJS1) $(OBJSC) -o $(EXE1) $(LDFLAGS)
-	$(LD) $(OBJS1) $(OBJSC) -o $(EXE1) $(LDFLAGS)
+	$(ECHO) $(LD) $(OBJS1) $(OBJSC) -o $(EXE1) $(LDFLAGS1)
+	$(LD) $(OBJS1) $(OBJSC) -o $(EXE1) $(LDFLAGS1)
 
 $(EXE2) : $(OBJS2) $(OBJSC)
-	$(ECHO) $(LD) $(OBJS2) $(OBJSC) -o $(EXE2) $(LDFLAGS)
-	$(LD) $(OBJS2) $(OBJSC) -o $(EXE2) $(LDFLAGS) $(LDFLAGSQ)
+	$(ECHO) $(LD) $(OBJS2) $(OBJSC) -o $(EXE2) $(LDFLAGS2)
+	$(LD) $(OBJS2) $(OBJSC) -o $(EXE2) $(LDFLAGS2)
 
 $(OBJS1) : force_look
 	$(ECHO) Looking into subdir $(DIR1): $(MAKE) $(MFLAGS)

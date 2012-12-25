@@ -105,9 +105,6 @@ static char * getDataLine(FILE *gamefile, char *line, char *value)
 
 static int getAttributeLine(FILE *gamefile, char *line)
 {
-    // Get a line and remove the final \n
-    if (getc(gamefile) != '\t')
-        return LINE_ERROR;
     if (fgets(line, LARGEST_LINE * sizeof(char), gamefile) == NULL)
         return LINE_ERROR;
     char *end = (strchr(line, '\n'));
@@ -116,7 +113,7 @@ static int getAttributeLine(FILE *gamefile, char *line)
         return LINE_START;
     if (!strcmp(line, "}"))
         return LINE_END;
-    
+   
     return LINE_SUCCESS;
 }
 

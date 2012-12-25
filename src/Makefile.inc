@@ -4,7 +4,8 @@ CXX             = g++
 PRJCFLAGS       = -Wall -Werror -Wextra -pedantic -std=c99 -g
 PRJCXXFLAGS     = `pkg-config --cflags QtGui` -Wall -Werror -Wextra -pedantic -std=c++11 -g
 LD              = gcc
-LDFLAGS         = `pkg-config --libs QtGui` -lm
+LDFLAGS1        = -lm
+LDFLAGS2        = `pkg-config --libs QtGui`
 RM              = rm
 ECHO            = echo
 
