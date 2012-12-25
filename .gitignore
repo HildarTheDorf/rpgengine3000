@@ -11,6 +11,10 @@ creator
 # Editor files
 *~
 
+# Dynamicly built files
+moc_*
+ui_*
+
 # Backup files
 *.tar.gz
 
