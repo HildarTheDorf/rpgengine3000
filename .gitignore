@@ -5,6 +5,7 @@
 *.out
 *.exe
 rpg
+*-build-*
 
 # Editor files
 *~
@@ -12,6 +13,8 @@ rpg
 # Backup files
 *.tar.gz
 
-# IDE "Project" files
+# Uneeded IDE "Project" files. This does not include Qt Creator's .pro file.
 *.dev
 *.win
+*.pro.user
+
