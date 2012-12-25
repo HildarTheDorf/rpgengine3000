@@ -164,7 +164,7 @@ static void spawnTerminal(int argc, char *argv[])
 
     // The real value for arg max would be in the millions through sysconf(_SC_ARG_MAX), but we can't trust it fully because it can clobber environment variables.
     // Halving it is a 'reasonable' failsafe.
-    long argmax = sysconf(_SC_ARG_MAX) / 2;
+    long unsigned argmax = sysconf(_SC_ARG_MAX) / 2;
     char commandline[argmax];
 
     // 35 = extra overhead in the commandline for the terminal name, and other parts of the (new) command line.

@@ -109,18 +109,22 @@ static int getAttributeLine(FILE *gamefile, char *line)
     // Get a line and remove the final \n
     if (fgets(line, LARGEST_LINE * sizeof(char), gamefile) == NULL)
         return LINE_ERROR;
-    if (!strcmp(line, "{\n"))
-        return LINE_START;
-    if (!strcmp(line, "}\n"))
-        return LINE_END;
-    
     char *end = (strchr(line, '\n'));
     *end = '\0';
+    if (!strcmp(line, "{"))
+        return LINE_START;
+    if (!strcmp(line, "}"))
+        return LINE_END;
+    
     return LINE_SUCCESS;
 }
 
-static int getNodeLine(FILE *gamefile, struct mapnode *node)
+static int getNodeLine(FILE *gamefile, struct mapnode *Node)
 {
     // Take a MapNode line and insert the data into the appropriate places.
-    return LINE_SUCCESS;
+    int ret = fread(Node->Desc, 1, 1, gamefile);
+    if (ret == 4)
+        return LINE_SUCCESS;
+    else
+        return LINE_ERROR;
 }

@@ -1,9 +1,5 @@
 #ifndef RPG3000_COMMON_H
 #define RPG3000_COMMON_H
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
 #ifdef _WIN32
 #   include <windows.h>
 #elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
@@ -12,6 +8,11 @@
 #else
 #   error "Please compile for windows or a POSIX compliant system. If you believe this is in error, define _WIN32 or __unix__ as appropriate."
 #endif
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
 
 #ifndef __GNUC__
 #   define __attribute__(x) /* NOTHING */

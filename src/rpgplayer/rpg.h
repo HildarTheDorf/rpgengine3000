@@ -32,14 +32,14 @@ static inline int flushchar(char input)
 }
 
 // 'Safe' malloc(). Checks for NULL and quits if program is out of memory.
-static inline void *smalloc(size_t size)
+static inline void * smalloc(size_t size)
 {
     void *pointer = malloc(size);
     // If malloc fails there's presumably no heap left.
     // Therefore there is a major (possibly system-wide) error!
     // Panic.
     if (pointer == NULL) { 
-        printf("\n***CRITICAL ERROR: Could not allocate %lu bytes of memory!***\n", size);
+        printf("\n***CRITICAL ERROR: Could not allocate %lu bytes of memory!***\n", (long unsigned)size);
         if (REQUIRE_GETCHAR)
             getchar();
         exit(EXIT_OOM);
