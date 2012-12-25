@@ -4,7 +4,7 @@ int main(int argc, char *argv[])
 {
     initGlobal(argc, argv);  //Process the commandline and re-exec in a terminal if required.
     struct datastruct *Data  = smalloc(sizeof(*Data));
-    initData(argv[1], Data); //Open up the datafile and dump it's data to the Data struct.
+    initData(argv[1], Data); //Open up the datafile and place its data to the Data struct.
 
     printf("Load succesful!\n\nTitle: %sCreator: %sVersion: %.1f\nBuilt with version: %.1f\n\nDescription:\n%s\n",
         Data->Title, Data->Creator, Data->Version, Data->BuiltWith, Data->Description);
@@ -43,12 +43,12 @@ static void initGlobal(int argc, char *argv[])
     if (argc < 2 || argv[1] == NULL || !strcmp(argv[1], "/dev/null") || (argc == 3 && strcmp(argv[2], "--no-auto-exit")) || argc > 3) {
         // Check for the last instance of / (or \ on windows) in argv[0]. The part after that is the executable name.
         // On windows, don't bother telling the user about --no-auto-exit since it is always on.
-        #ifdef _WIN32
-        char *ptr = strrchr(argv[0], '\\');
-        printf("Error: invalid arguments\nUsage: %s gamefile\n\n", ptr + 1);
-        #else
+        #if defined __unix__ || (defined __APPLE__ && __MACH__)
         char *ptr = strrchr(argv[0], '/');
         printf("Error: invalid arguments\nUsage: %s gamefile [--no-auto-exit]\n\n", ptr + 1);
+        #else
+        char *ptr = strrchr(argv[0], '\\');
+        printf("Error: invalid arguments\nUsage: %s gamefile\n\n", ptr + 1);
         #endif
 
         cleanup(EXIT_ARGUMENTS, NULL);

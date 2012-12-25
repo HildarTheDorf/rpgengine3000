@@ -6,11 +6,15 @@ Description=A simple game to showcase the features of rpgcreator3000.
 Version=0.1
 Attributes=6
 {
-Strength
-Agility
-Constitution
-Intellect
-Wisdom
-Charisma
+    Strength
+    Agility
+    Constitution
+    Intellect
+    Wisdom
+    Charisma
 }
-
+MapNodes=2
+{
+    0=1,\0,\0,\0,\0,\0,\0,\0,Room0,This is room 0,\0,\0,0x0
+    1=0,\0,\0,\0,\0,\0,\0,\0,Room1,This is room 1,\0,\0,0x0
+}

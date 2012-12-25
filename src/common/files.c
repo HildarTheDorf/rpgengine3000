@@ -16,10 +16,8 @@ int readfile(FILE *gamefile, struct datastruct *Data)
     // magic[4] must be a null since fread() doesn't null terminate.
     magic[4] = '\0';
 
-    if (ret != 4 || strcmp(magic, MAGIC)) {
-        puts("Game file invalid or corrupt\n");
-        return EXIT_INVALIDGAMEFILE;
-    }
+    if (ret != 4 || strcmp(magic, MAGIC))
+        returnInvalid();
 
     char name[LARGEST_LINE];
     char *value = NULL;
@@ -27,20 +25,13 @@ int readfile(FILE *gamefile, struct datastruct *Data)
     // This means BuiltWith MUST be the 2nd line, directly after the magic number
     value = getDataLine(gamefile, name, value);
 
-    if (strcmp(name, "BuiltWith")) {
-        puts("Game file invalid or corrupt\n");
-        free(Data);
-        return EXIT_INVALIDGAMEFILE;
-    }
+    if (strcmp(name, "BuiltWith"))
+        returnInvalid();
 
     Data->BuiltWith = atof(value);
 
-    if (Data->BuiltWith > FILES_VERSION) {
-        printf("\nERROR: Game file too new, created with version %f\nPlease update the program.\n\n", Data->BuiltWith);
-        free(Data);
-        return EXIT_INVALIDGAMEFILE;
-    }
-
+    if (Data->BuiltWith > FILES_VERSION)
+        returnNew();
     // Keep going over the lines and placing the data into the appropriate places.
     while (value != NULL) {
         value = getDataLine(gamefile, name, value);
@@ -53,22 +44,21 @@ int readfile(FILE *gamefile, struct datastruct *Data)
             strncpy(Data->Description, value, LARGEST_DATA * sizeof(char));
         if (!strcmp(name, "Version"))
             Data->Version = atof(value);
+
         if (!strcmp(name, "Attributes")) {
-            if (sscanf(value, "%hu", &Data->NumAttributes) != 1) {
-                puts("Game file invalid or corrupt\n");
-                free(Data);
-                return EXIT_INVALIDGAMEFILE;
-            }
-            for (short i = 0; i < Data->NumAttributes; ++i) {
+            if (sscanf(value, "%hu", &Data->NumAttributes) != 1)
+                returnInvalid();
+
+            for (short unsigned i = 0; i < Data->NumAttributes; ++i) {
                 switch (getAttributeLine(gamefile, name)) {
                 case (LINE_ERROR) :
-                    puts("Game file invalid or corrupt\n");
-                    free(Data);
-                    return EXIT_INVALIDGAMEFILE;
+                    returnInvalid();
                 case (LINE_START) :
                     --i;
                     break;
                 case (LINE_END) :
+                    if (i != Data->NumAttributes - 1)
+                        returnInvalid();
                     i = LARGEST_ATTRIB_NUM + 1;
                     break;
                 case (LINE_SUCCESS) :
@@ -76,6 +66,26 @@ int readfile(FILE *gamefile, struct datastruct *Data)
                 }
             }
         }
+        if (!strcmp(name, "MapNodes")) {
+            short unsigned numnodes;
+            if (sscanf(value, "%hu", &numnodes) != 1)
+                returnInvalid();
+
+            for (short unsigned i = 0; i < Data->NumAttributes; ++i) {
+                switch (getNodeLine(gamefile, &Data->Map[i])) {
+                case (LINE_ERROR) :
+                    returnInvalid();
+                case (LINE_START) :
+                    --i;
+                    break;
+                case (LINE_END) :
+                    if (i != numnodes - 1)
+                        returnInvalid();
+                    i = MAX_MAP_SIZE + 1;
+                    break;
+                }
+            }
+        }                    
     }
 
     return EXIT_SUCCESS;
@@ -106,5 +116,11 @@ static int getAttributeLine(FILE *gamefile, char *line)
     
     char *end = (strchr(line, '\n'));
     *end = '\0';
+    return LINE_SUCCESS;
+}
+
+static int getNodeLine(FILE *gamefile, struct mapnode *node)
+{
+    // Take a MapNode line and insert the data into the appropriate places.
     return LINE_SUCCESS;
 }
