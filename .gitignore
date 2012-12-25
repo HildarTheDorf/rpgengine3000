@@ -5,6 +5,7 @@
 *.out
 *.exe
 rpg
+creator
 *-build-*
 
 # Editor files
