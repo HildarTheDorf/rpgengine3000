@@ -1,5 +1,6 @@
 #ifndef RPG3000_COMMON_H
 #define RPG3000_COMMON_H
+
 #ifdef _WIN32
 #   include <windows.h>
 #elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
@@ -14,10 +15,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <math.h>
-
-#ifndef __GNUC__
-#   define __attribute__(x) /* NOTHING */
-#endif
+#include <ctype.h>
 
 enum {
     EXIT_ARGUMENTS = 1,
@@ -39,8 +37,8 @@ static const unsigned short EAST_VALID   = 0x04;
 static const unsigned short WEST_VALID   = 0x08;
 static const unsigned short UP_VALID     = 0x10;
 static const unsigned short DOWN_VALID   = 0x20;
-static const unsigned short EXTRA1_VALID = 0x40;
-static const unsigned short EXTRA2_VALID = 0x80;
+static const unsigned short EXTRA0_VALID = 0x40;
+static const unsigned short EXTRA1_VALID = 0x80;
 
 static const unsigned short ROOM_FLAGS_DARK = 0x01;
 
@@ -54,7 +52,7 @@ enum {
     EXIT_EXTRA0,
     EXIT_EXTRA1,
 };
-// Change EXIT_MAX if you change the above enum.
+// Change EXIT_MAX and an _VALID flag if you add extra exits to the above enum.
 #define EXIT_MAX EXIT_EXTRA1 + 1
 
 // This struct, and the latter datastruct one, have their contents ordered oddly to save space due to alignment.
@@ -67,13 +65,14 @@ struct mapnode {
     unsigned short ID;
     unsigned short ValidExits;
     unsigned short Flags;
+    char ExitLetter[EXIT_MAX - 6];
 };
 
 #define LARGEST_NAME 32
 #define LARGEST_DATA 256
 static const unsigned short LARGEST_LINE = LARGEST_NAME + LARGEST_DATA + 3; //name + '=' + data + '\n' + '\0'
 
-#define LARGEST_ATTRIB_NUM 13
+#define LARGEST_ATTRIB_NUM 15
 #define MAX_MAP_SIZE 4096
 
 struct datastruct {
@@ -86,8 +85,6 @@ struct datastruct {
     float Version;
     short unsigned NumAttributes;
 };
-
-extern bool REQUIRE_GETCHAR;
 
 static const char MAGIC[] = "GEW\n";
 
