@@ -4,6 +4,7 @@
 #include "../common.h"
 
 static void printDescription(struct mapnode);
-static bool handleInput(struct datastruct, struct mapnode **);
+static bool handleInput(const struct datastruct *, struct mapnode **);
+static void movePlayer(struct mapnode **, short);
 
 #endif

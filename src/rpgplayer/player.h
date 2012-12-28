@@ -6,7 +6,7 @@
 extern bool REQUIRE_GETCHAR;
 static const float PLAYER_VERSION = 0.0;
 
-int mainLoop(struct datastruct, struct mapnode *);
+int mainLoop(const struct datastruct *, struct mapnode *);
 void clearScreen(void);
 
 // Flushes stdin to the next line or EOF, whichever comes first.

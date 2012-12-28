@@ -79,7 +79,7 @@ int readfile(FILE *gamefile, struct datastruct *Data)
             if (strcmp(fgets(name, 3, gamefile), "{\n"))
                 returnInvalid();
             for (short unsigned i = 0; i < numnodes; ++i) {
-                switch (getNodeLine(gamefile, &Data->Map[i], *Data)) {
+                switch (getNodeLine(gamefile, &Data->Map[i], Data)) {
                 case (LINE_ERROR) :
                     returnInvalid();
                 }
@@ -117,24 +117,25 @@ static int getAttributeLine(FILE *gamefile, char *line)
     return LINE_SUCCESS;
 }
 
-static int getNodeLine(FILE *gamefile, struct mapnode *Node, struct datastruct Data)
+static int getNodeLine(FILE *gamefile, struct mapnode *Node, struct datastruct *Data)
 {
     // Take a MapNode line and insert the data into the appropriate places.
     short unsigned exitID[EXIT_MAX];
-    // Abuse of a scanf format string.
+    // Best (ab)use of a scanf format string.
     char format[256];
-    sprintf(format, "\t%%hu=%%hu,%%hu,%%hu,%%hu,%%hu,%%hu,%%hu,%%hu\n\t%%%d[^\n]\n\t%%%d[^\n]\n\t%%%d[^\n]\n\t%%%d[^\n]\n\t%%hx\n",
+    sprintf(format, "%%hu=%%hu,%%hu,%%hu,%%hu,%%hu,%%hu,%%hu,%%hu\n\t%%%d[^\n]\n\t%%%d[^\n]\n\t%%%d[^\n]\n\t%%%d[^\n]\n\t%%hx\n",
                         LARGEST_ROOM_NAME, LARGEST_ROOM_DESC, LARGEST_EXIT_NAME, LARGEST_EXIT_NAME);
     int ret = fscanf(gamefile, format,
                         &Node->ID, &exitID[0], &exitID[1], &exitID[2], &exitID[3], &exitID[4], &exitID[5], &exitID[6], &exitID[7],
                         Node->Name, Node->Desc, Node->ExitName[0], Node->ExitName[1], &Node->Flags);
 
     if (ret == 14) {
+        Node->ValidExits = 0x0;
         // Convert exits from ID to an actual pointer. Then set ValidExits as appropriate.
         for (short unsigned i = 0; i < EXIT_MAX; ++i) {
             if (exitID[i] != INVALID_ROOM) {
-                Node->Exit[i] = &Data.Map[exitID[i]];
-                Node->ValidExits |= (int)pow(2, i);
+                Node->Exit[i] = &Data->Map[exitID[i]];
+                Node->ValidExits |= exit2Flag(i);
             }
         }
         return LINE_SUCCESS;

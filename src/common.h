@@ -31,15 +31,6 @@ enum {
 #define LARGEST_ROOM_DESC 256
 #define LARGEST_EXIT_NAME 32
 
-static const unsigned short NORTH_VALID  = 0x01;
-static const unsigned short SOUTH_VALID  = 0x02;
-static const unsigned short EAST_VALID   = 0x04;
-static const unsigned short WEST_VALID   = 0x08;
-static const unsigned short UP_VALID     = 0x10;
-static const unsigned short DOWN_VALID   = 0x20;
-static const unsigned short EXTRA0_VALID = 0x40;
-static const unsigned short EXTRA1_VALID = 0x80;
-
 static const unsigned short ROOM_FLAGS_DARK = 0x01;
 
 enum {
@@ -54,6 +45,15 @@ enum {
 };
 // Change EXIT_MAX and an _VALID flag if you add extra exits to the above enum.
 #define EXIT_MAX EXIT_EXTRA1 + 1
+
+static const unsigned short NORTH_VALID  = 0x01;
+static const unsigned short SOUTH_VALID  = 0x02;
+static const unsigned short EAST_VALID   = 0x04;
+static const unsigned short WEST_VALID   = 0x08;
+static const unsigned short UP_VALID     = 0x10;
+static const unsigned short DOWN_VALID   = 0x20;
+static const unsigned short EXTRA0_VALID = 0x40;
+static const unsigned short EXTRA1_VALID = 0x80;
 
 // This struct, and the latter datastruct one, have their contents ordered oddly to save space due to alignment.
 // This is an optimization specific to Linux x64, but should be reasonably valid on most none-estoric systems.
@@ -89,5 +89,8 @@ struct datastruct {
 static const char MAGIC[] = "GEW\n";
 
 int readfile(FILE * gamefile, struct datastruct *Data);
+
+// Converts an exit id (e.g. EXIT_NORTH) to an valid exit flag (e.g. NORTH_VALID)
+#define exit2Flag(x) (int)pow(2, x)
 
 #endif

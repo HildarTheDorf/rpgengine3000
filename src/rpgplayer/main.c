@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     initData(argv[1], Data); //Open up the datafile and place its data to the Data struct.
 
     struct mapnode *Location; //Get a pointer to map node ID 0. Eventually recall the last location from a savefile.
-    initMap(*Data, &Location);
+    initMap(Data, &Location);
 
     printf("Load succesful!\n\nTitle: %sCreator: %sVersion: %.1f\nBuilt with version: %.1f\n\nDescription:\n%s\n",
         Data->Title, Data->Creator, Data->Version, Data->BuiltWith, Data->Description);
@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     puts("Press enter to begin...");
     flushchar('\0');
 
-    int ret = mainLoop(*Data, Location);
+    int ret = mainLoop(Data, Location);
 
     return cleanup(ret, Data);
 }
@@ -85,9 +85,9 @@ static void initData(char *filename, struct datastruct *Data)
     return;
 }
 
-static void initMap(struct datastruct Data, struct mapnode **Location)
+static void initMap(struct datastruct *Data, struct mapnode **Location)
 {
-    *Location = &Data.Map[0];
+    *Location = &Data->Map[0];
 }
 
 static int cleanup(int exitstatus, struct datastruct *Data)
