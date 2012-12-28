@@ -2,7 +2,6 @@
 
 int mainLoop(const struct datastruct *Data, struct mapnode *Location)
 {   
-    printf("%p %p\n%p %p\n", (void *)Location, (void *)&Data->Map[0], (void *)Location->Exit[0], (void *)&Data->Map[1]);
     printDescription(*Location);
 
     while (handleInput(Data, &Location) == false)

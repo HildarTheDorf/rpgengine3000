@@ -91,6 +91,6 @@ static const char MAGIC[] = "GEW\n";
 int readfile(FILE * gamefile, struct datastruct *Data);
 
 // Converts an exit id (e.g. EXIT_NORTH) to an valid exit flag (e.g. NORTH_VALID)
-#define exit2Flag(x) (int)pow(2, x)
+#define exit2Flag(x) 1<<x   
 
 #endif
