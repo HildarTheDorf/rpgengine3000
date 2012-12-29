@@ -123,13 +123,13 @@ static int getNodeLine(FILE *gamefile, struct mapnode *Node, struct datastruct *
     short unsigned exitID[EXIT_MAX];
     // Best (ab)use of a scanf format string.
     char format[256];
-    sprintf(format, "%%hu=%%hu,%%hu,%%hu,%%hu,%%hu,%%hu,%%hu,%%hu\n\t%%%d[^\n]\n\t%%%d[^\n]\n\t%%%d[^\n]\n\t%%%d[^\n]\n\t%%hx\n",
+    sprintf(format, "%%hu=%%hu,%%hu,%%hu,%%hu,%%hu,%%hu,%%hu,%%hu\n%%%d[^\n]\n%%%d[^\n]\n%%%d[^,],%%c\n%%%d[^,],%%c\n%%hx\n",
                         LARGEST_ROOM_NAME, LARGEST_ROOM_DESC, LARGEST_EXIT_NAME, LARGEST_EXIT_NAME);
     int ret = fscanf(gamefile, format,
                         &Node->ID, &exitID[0], &exitID[1], &exitID[2], &exitID[3], &exitID[4], &exitID[5], &exitID[6], &exitID[7],
-                        Node->Name, Node->Desc, Node->ExitName[0], Node->ExitName[1], &Node->Flags);
+                        Node->Name, Node->Desc, Node->ExitName[0], &Node->ExitLetter[0], Node->ExitName[1], &Node->ExitLetter[1], &Node->Flags);
 
-    if (ret == 14) {
+    if (ret == 16) {
         Node->ValidExits = 0x0;
         // Convert exits from ID to an actual pointer. Then set ValidExits as appropriate.
         for (short unsigned i = 0; i < EXIT_MAX; ++i) {

@@ -52,10 +52,10 @@ static void initGlobal(int argc, char *argv[])
         // On windows, don't bother telling the user about --no-auto-exit since it is implicitly always on.
         #if defined __unix__ || (defined __APPLE__ && __MACH__)
         char *ptr = strrchr(argv[0], '/');
-        printf("Error: invalid arguments\nUsage: %s gamefile [--no-auto-exit]\n\n", ptr + 1);
+        fprintf(stderr, "Error: invalid arguments\nUsage: %s gamefile [--no-auto-exit]\n\n", ptr + 1);
         #else
         char *ptr = strrchr(argv[0], '\\');
-        printf("Error: invalid arguments\nUsage: %s gamefile\n\n", ptr + 1);
+        fprintf(stderr, "Error: invalid arguments\nUsage: %s gamefile\n\n", ptr + 1);
         #endif
 
         cleanup(EXIT_ARGUMENTS, NULL);

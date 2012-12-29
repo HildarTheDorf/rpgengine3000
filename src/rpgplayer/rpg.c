@@ -15,6 +15,7 @@ static bool handleInput(const struct datastruct *Data, struct mapnode **Location
     char input = getchar();
     flushchar(input);
     input = tolower(input);
+
     switch (input) {
     case 'q' :
         return true;
@@ -40,6 +41,10 @@ static bool handleInput(const struct datastruct *Data, struct mapnode **Location
         movePlayer(Location, EXIT_DOWN);
         break;
     }
+    for (unsigned short i = EXIT_EXTRA0; i < EXIT_MAX; ++i)
+        if (input == (*Location)->ExitLetter[exit2Letter(i)])
+            movePlayer(Location, i);
+
     return false;
 }
 
@@ -48,29 +53,28 @@ static void printDescription(struct mapnode Location)
     clearScreen();
     printf("%s\n\n%s\nExits:\n", Location.Name, Location.Desc);
     if (Location.ValidExits & NORTH_VALID)
-        puts("North <N> ");
+        printf("North<N> ");
     if (Location.ValidExits & SOUTH_VALID)
-        puts("South <S> ");
+        printf("South<S> ");
     if (Location.ValidExits & EAST_VALID)
-        puts("East <E> ");
+        printf("East<E> ");
     if (Location.ValidExits & WEST_VALID)
-        puts("West <W> ");
+        printf("West<W> ");
     if (Location.ValidExits & UP_VALID)
-        puts("Up <U> ");
+        printf("Up<U> ");
     if (Location.ValidExits & DOWN_VALID)
-        puts("Down <D> ");
-    if (Location.ValidExits & EXTRA0_VALID)
-        printf("%s <%c> ", Location.ExitName[0], Location.ExitLetter[0]);
-    if (Location.ValidExits & EXTRA1_VALID)
-        printf("%s <%c> ", Location.ExitName[1], Location.ExitLetter[1]);
+        printf("Down<D> ");
+    for (unsigned short i = EXIT_EXTRA0; i < EXIT_MAX; ++i)
+        if (Location.ValidExits & exit2Flag(i))
+            printf("%s<%c> ", Location.ExitName[exit2Letter(i)], toupper(Location.ExitLetter[exit2Letter(i)]));
 
-
+    puts("\n");
 }
 
 static void movePlayer(struct mapnode **Location, short direction)
 {
-    int exitflags = exit2Flag(direction);
-    if ((**Location).ValidExits & exitflags) {
+    int exitflag = exit2Flag(direction);
+    if ((**Location).ValidExits & exitflag) {
         *Location = (*Location)->Exit[direction];
         printDescription(**Location);
     }

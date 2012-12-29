@@ -15,17 +15,16 @@ Attributes=6
 }
 MapNodes=2
 {
-    0=1,13337,13337,13337,13337,13337,13337,13337
+    0=1,13337,13337,13337,13337,13337,0,13337
     Room0
     This is room 0
-    Dummy
-    Dummy
+    Here,h
+    Dummy,n
     0
     1=13337,0,13337,13337,13337,13337,13337,13337
     Room1
     This is room 1
-    Dummy
-    Dummy
+    Dummy,n
+    Dummy,n
     0
-
 }
