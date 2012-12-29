@@ -17,7 +17,7 @@
 #include <ctype.h>
 
 // Converts an exit id (e.g. EXIT_NORTH) to an valid exit flag (e.g. NORTH_VALID)
-#define exit2Flag(x) 1<<x   
+#define exit2Flag(x) 1<<x
 
 // Converts an extra exit id (e.g. EXIT_EXTRA0) to it's index number (e.g. 0)
 #define exit2Letter(x) x-6
@@ -49,7 +49,7 @@ enum {
     EXIT_EXTRA1,
 };
 // Change EXIT_MAX and an _VALID flag if you add extra exits to the above enum.
-#define EXIT_MAX EXIT_EXTRA1
+#define EXIT_MAX EXIT_EXTRA1 + 1
 
 static const unsigned short NORTH_VALID  = 0x01;
 static const unsigned short SOUTH_VALID  = 0x02;
