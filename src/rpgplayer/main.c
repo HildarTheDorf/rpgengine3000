@@ -97,7 +97,7 @@ static int cleanup(int exitstatus, struct datastruct *Data)
         Data = NULL;
     }
 
-    if (REQUIRE_GETCHAR) {
+    if (REQUIRE_GETCHAR && exitstatus != EXIT_SUCCESS) {
         puts("Press any key to continue...\n");
         getchar();
     }
@@ -111,7 +111,7 @@ void clearScreen(void)
 {
 #ifdef _WIN32
     /* Standard error macro for reporting Win32 API errors */
-    #define PERR(bSuccess, api){if(!(bSuccess)) printf("%s:Error %d from %s \
+    #define PERR(bSuccess, api){if(!(bSuccess)) printf("WinAPI error in %s:Error %d from %s \
     on line %d\n", __FILE__, GetLastError(), api, __LINE__);}
     
     COORD coordScreen = { 0, 0 };    /* here's where we'll home the cursor */
@@ -120,8 +120,7 @@ void clearScreen(void)
     BOOL bSuccess;
     DWORD cCharsWritten;
     CONSOLE_SCREEN_BUFFER_INFO csbi; /* to get buffer info */
-    DWORD dwConSize;                 /* number of character cells in
-                                        the current buffer */
+    DWORD dwConSize;                 /* number of character cells in the current buffer */
 
     /* get the number of character cells in the current buffer */
     bSuccess = GetConsoleScreenBufferInfo( hConsole, &csbi );
@@ -149,22 +148,18 @@ void clearScreen(void)
 
     bSuccess = SetConsoleCursorPosition( hConsole, coordScreen );
     PERR( bSuccess, "SetConsoleCursorPosition" );
+
 #elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
     // Use ANSI terminal escapes to move cursor to top left and wipe the screen.
     puts("\033[H\033[2J");
 #endif
+
     return;
 }
+
 #if defined __unix__ || (defined __APPLE__ && defined __MACH__)
 static void spawnTerminal(int argc, char *argv[])
 {
-    // We are not running in a (pseudo-)terminal, let's try to launch one:
-    if (getenv("DISPLAY") == NULL)
-        // No controlling terminal, and we are not within an X server.
-        // Therefore we are running as a daemon?!
-        // Panic.
-        exit(EXIT_NOTINTERACTIVE);
-
     char* term = getenv("TERM");
     // If we didn't get a TERM, assume xterm for now, we will try others later.
     if (term == NULL)
@@ -175,7 +170,7 @@ static void spawnTerminal(int argc, char *argv[])
         argv[1] = "/dev/null";
 
     // The real value for arg max is normally in the millions through sysconf(_SC_ARG_MAX), at at least 4096.
-    // But we can't trust it fully because it includes, and can thus clobber, environment variables.
+    // But we can't trust it fully because it includes, and can thus we could clobber, environment variables.
     // Halving it is a 'reasonable' failsafe.
     long unsigned argmax = sysconf(_SC_ARG_MAX) / 2;
     char commandline[argmax];

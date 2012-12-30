@@ -36,6 +36,7 @@ int readfile(FILE *gamefile, struct datastruct *Data)
     // Keep going over the lines and placing the data into the appropriate places.
     while (value != NULL) {
         value = getDataLine(gamefile, name, value);
+
         // Simple text fields.
         if (!strcmp(name, "Creator"))
             strncpy(Data->Creator, value, LARGEST_DATA * sizeof(char));
@@ -121,8 +122,8 @@ static int getNodeLine(FILE *gamefile, struct mapnode *Node, struct datastruct *
 {
     // Take a MapNode line and insert the data into the appropriate places.
     short unsigned exitID[EXIT_MAX];
-    // Best (ab)use of a scanf format string.
     char format[256];
+
     sprintf(format, "%%hu=%%hu,%%hu,%%hu,%%hu,%%hu,%%hu,%%hu,%%hu\n%%%d[^\n]\n%%%d[^\n]\n%%%d[^,],%%c\n%%%d[^,],%%c\n%%hx\n",
                         LARGEST_ROOM_NAME, LARGEST_ROOM_DESC, LARGEST_EXIT_NAME, LARGEST_EXIT_NAME);
     int ret = fscanf(gamefile, format,
