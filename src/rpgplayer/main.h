@@ -17,7 +17,8 @@ bool REQUIRE_GETCHAR = false;
 static void initGlobal(int, char *[]); 
 static void initData(char *, struct datastruct *);
 static void initMap(struct datastruct *, struct mapnode **);
-static int cleanup(int, struct datastruct *);
+static void initPlayer(const struct datastruct *Data, struct charstruct *Player);
+static int cleanup(int, struct datastruct *, struct charstruct *);
 #if defined __unix__ || (defined __APPLE__ && __MACH__)
 static void spawnTerminal(int, char *[]) __attribute__((noreturn));
 #endif

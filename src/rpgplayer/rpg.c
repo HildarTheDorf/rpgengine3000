@@ -1,16 +1,20 @@
 #include "rpg.h"
 
-int mainLoop(const struct datastruct *Data, struct mapnode *Location)
+int mainLoop(const struct datastruct *Data, struct mapnode *Location, struct charstruct *Player)
 {   
-    printDescription(*Location);
+    bool ret = false;
+    srand(1); // Initilize the random seed, or rather, don't while debugging.
+    printDescription(Location);
 
-    while (handleInput(Data, &Location) == false)
-        ;
+    while (ret == false) { // If any function returns true, ret is set to true and we exit.
+        ret |= handleInput(Data, &Location, Player);
+        ret |= randomEvent(Data, &Location, Player);
+    }
 
     return EXIT_SUCCESS;
 }
 
-static bool handleInput(const struct datastruct *Data, struct mapnode **Location)
+static bool handleInput(const struct datastruct *Data, struct mapnode **Location, struct charstruct *Player)
 {
     char input = getchar();
     flushchar(input);
@@ -20,7 +24,7 @@ static bool handleInput(const struct datastruct *Data, struct mapnode **Location
     case 'q' :
         return true;
     case 'l' :
-        printDescription(**Location);
+        printDescription(*Location);
         break;
     case 'n' :
         movePlayer(Location, EXIT_NORTH);
@@ -48,25 +52,26 @@ static bool handleInput(const struct datastruct *Data, struct mapnode **Location
     return false;
 }
 
-static void printDescription(struct mapnode Location)
+static void printDescription(const struct mapnode *Location)
 {
     clearScreen();
-    printf("%s\n\n%s\nExits:\n", Location.Name, Location.Desc);
-    if (Location.ValidExits & NORTH_VALID)
+    printf("You are at %d %p\n", Location->ID, (void *)Location);
+    printf("%s\n\n%s\nExits:\n", Location->Name, Location->Desc);
+    if (Location->ValidExits & NORTH_VALID)
         printf("North<N> ");
-    if (Location.ValidExits & SOUTH_VALID)
+    if (Location->ValidExits & SOUTH_VALID)
         printf("South<S> ");
-    if (Location.ValidExits & EAST_VALID)
+    if (Location->ValidExits & EAST_VALID)
         printf("East<E> ");
-    if (Location.ValidExits & WEST_VALID)
+    if (Location->ValidExits & WEST_VALID)
         printf("West<W> ");
-    if (Location.ValidExits & UP_VALID)
+    if (Location->ValidExits & UP_VALID)
         printf("Up<U> ");
-    if (Location.ValidExits & DOWN_VALID)
+    if (Location->ValidExits & DOWN_VALID)
         printf("Down<D> ");
     for (unsigned short i = EXIT_EXTRA0; i < EXIT_MAX; ++i)
-        if (Location.ValidExits & exit2Flag(i))
-            printf("%s<%c> ", Location.ExitName[exit2Letter(i)], toupper(Location.ExitLetter[exit2Letter(i)]));
+        if (Location->ValidExits & exit2Flag(i))
+            printf("%s<%c> ", Location->ExitName[exit2Letter(i)], toupper(Location->ExitLetter[exit2Letter(i)]));
 
     puts("\n");
 }
@@ -74,10 +79,22 @@ static void printDescription(struct mapnode Location)
 static void movePlayer(struct mapnode **Location, short direction)
 {
     int exitflag = exit2Flag(direction);
-    if ((**Location).ValidExits & exitflag) {
+    if ((*Location)->ValidExits & exitflag) {
         *Location = (*Location)->Exit[direction];
-        printDescription(**Location);
+        printDescription(*Location);
     }
     return;
 }
 
+static bool randomEvent(const struct datastruct *Data, struct mapnode **Location, struct charstruct *Player)
+{
+    double random = (double)rand()/RAND_MAX;
+    if (random < 0.5)
+        return combat(Data, Player, 1);
+    return false;
+}
+
+static bool combat(const struct datastruct *Data, struct charstruct *Player, unsigned enemyID)
+{
+    return false;
+}

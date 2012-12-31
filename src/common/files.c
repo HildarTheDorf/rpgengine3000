@@ -134,6 +134,7 @@ static int getNodeLine(FILE *gamefile, struct mapnode *Node, struct datastruct *
         Node->ValidExits = 0x0;
         // Convert exits from ID to an actual pointer. Then set ValidExits as appropriate.
         for (short unsigned i = 0; i < EXIT_MAX; ++i) {
+
             if (exitID[i] != INVALID_ROOM) {
                 Node->Exit[i] = &Data->Map[exitID[i]];
                 Node->ValidExits |= exit2Flag(i);

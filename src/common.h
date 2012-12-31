@@ -60,8 +60,8 @@ static const unsigned short DOWN_VALID   = 0x20;
 static const unsigned short EXTRA0_VALID = 0x40;
 static const unsigned short EXTRA1_VALID = 0x80;
 
-// This struct, and the latter datastruct one, have their contents ordered oddly to save space due to alignment.
-// This is an optimization specific to Linux x64, but should be reasonably valid on most none-estoric systems.
+// This struct, and the latter ones, have their contents ordered oddly to save space due to alignment.
+// This is an optimization made for Linux x64, but should be valid on most none-estoric systems.
 struct mapnode {
     char Desc[LARGEST_ROOM_DESC];
     char ExitName[EXIT_MAX - 6][LARGEST_EXIT_NAME];
@@ -73,9 +73,9 @@ struct mapnode {
     char ExitLetter[EXIT_MAX - 6];
 };
 
-#define LARGEST_NAME 32
+#define LARGEST_DATA_NAME 32
 #define LARGEST_DATA 256
-static const unsigned short LARGEST_LINE = LARGEST_NAME + LARGEST_DATA + 3; //name + '=' + data + '\n' + '\0'
+static const unsigned short LARGEST_LINE = LARGEST_DATA_NAME + LARGEST_DATA + 3; //name + '=' + data + '\n' + '\0'
 
 #define LARGEST_ATTRIB_NUM 15
 #define MAX_MAP_SIZE 4096
@@ -89,6 +89,13 @@ struct datastruct {
     float BuiltWith;
     float Version;
     short unsigned NumAttributes;
+};
+
+#define LARGEST_CHARACTER_NAME 32
+
+struct charstruct {
+    char Name[LARGEST_CHARACTER_NAME];
+    unsigned Attributes [LARGEST_ATTRIB_NUM];
 };
 
 static const char MAGIC[] = "GEW\n";

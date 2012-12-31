@@ -11,15 +11,21 @@ int main(int argc, char *argv[])
     struct mapnode *Location; //Get a pointer to map node ID 0. Eventually recall the last location from a savefile.
     initMap(Data, &Location);
 
+    struct charstruct *Player = smalloc(sizeof(*Player));
+    initPlayer(Data, Player); // Eventually load a file, right now puts dummy values in a player array.
+
     printf("Load succesful!\n\nTitle: %sCreator: %sVersion: %.1f\nBuilt with version: %.1f\n\nDescription:\n%s\n",
         Data->Title, Data->Creator, Data->Version, Data->BuiltWith, Data->Description);
+
+    printf("Player: Attributes %d, %d, %d, %d, %d, %d.\nName: %s\n",
+        Player->Attributes[0], Player->Attributes[1], Player->Attributes[2], Player->Attributes[3], Player->Attributes[4], Player->Attributes[5], Player->Name);
 
     puts("Press enter to begin...");
     flushchar('\0');
 
-    int ret = mainLoop(Data, Location);
+    int ret = mainLoop(Data, Location, Player);
 
-    return cleanup(ret, Data);
+    return cleanup(ret, Data, Player);
 }
 
 static void initGlobal(int argc, char *argv[])
@@ -58,7 +64,7 @@ static void initGlobal(int argc, char *argv[])
         fprintf(stderr, "Error: invalid arguments\nUsage: %s gamefile\n\n", ptr + 1);
         #endif
 
-        cleanup(EXIT_ARGUMENTS, NULL);
+        cleanup(EXIT_ARGUMENTS, NULL, NULL);
 
         return;
     }
@@ -72,14 +78,14 @@ static void initData(char *filename, struct datastruct *Data)
 
     if (gamefile == NULL) {
         printf("Game file %s not found.\n", filename);
-        cleanup(EXIT_NOGAMEFILE, Data);
+        cleanup(EXIT_NOGAMEFILE, Data, NULL);
     }
 
     int ret = readfile(gamefile, Data);
     fclose(gamefile);
 
     if (Data == NULL || ret != EXIT_SUCCESS) {
-        cleanup(EXIT_INVALIDGAMEFILE, Data);
+        cleanup(EXIT_INVALIDGAMEFILE, Data, NULL);
     }
 
     return;
@@ -90,11 +96,23 @@ static void initMap(struct datastruct *Data, struct mapnode **Location)
     *Location = &Data->Map[0];
 }
 
-static int cleanup(int exitstatus, struct datastruct *Data)
+static void initPlayer(const struct datastruct *Data, struct charstruct *Player)
+{
+    for (unsigned short i = 0; i < Data->NumAttributes; ++i)
+        Player->Attributes[i] = 1;
+    strcpy(Player->Name, "Shalune");
+}
+
+static int cleanup(int exitstatus, struct datastruct *Data, struct charstruct *Player)
 {
     if (Data != NULL) {
         free(Data);
         Data = NULL;
+    }
+
+    if (Player != NULL) {
+        free(Player);
+        Player = NULL;
     }
 
     if (REQUIRE_GETCHAR && exitstatus != EXIT_SUCCESS) {
