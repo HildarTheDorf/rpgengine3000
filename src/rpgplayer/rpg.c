@@ -1,5 +1,8 @@
 #include "rpg.h"
 
+// Location gets passed around as a (struct mapnode **) so that deeply nested functions can change the location.
+// If a function has no need to modify a struct it gets given a (const struct structname *). ((Even Location)).
+
 int mainLoop(const struct datastruct *Data, struct mapnode *Location, struct charstruct *Player)
 {   
     bool ret = false;
