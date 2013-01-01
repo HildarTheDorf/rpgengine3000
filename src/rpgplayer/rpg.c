@@ -58,7 +58,6 @@ static bool handleInput(const struct datastruct *Data, struct mapnode **Location
 static void printDescription(const struct mapnode *Location)
 {
     clearScreen();
-    printf("You are at %d %p\n", Location->ID, (void *)Location);
     printf("%s\n\n%s\nExits:\n", Location->Name, Location->Desc);
     if (Location->ValidExits & NORTH_VALID)
         printf("North<N> ");

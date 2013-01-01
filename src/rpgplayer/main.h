@@ -8,12 +8,6 @@
 #   define __attribute__(x) /* Defined as nothing (i.e. removed) if unsupported. */
 #endif
 
-#ifdef _WIN32
-bool REQUIRE_GETCHAR = true;
-#else
-bool REQUIRE_GETCHAR = false;
-#endif
-
 static void initGlobal(int, char *[]); 
 static void initData(char *, struct datastruct *);
 static void initMap(struct datastruct *, struct mapnode **);

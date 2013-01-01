@@ -30,6 +30,9 @@ int main(int argc, char *argv[])
 
 static void initGlobal(int argc, char *argv[])
 {
+#if defined _WIN32
+    requireGetchar(1);
+#endif
 #if defined __unix__ || (defined __APPLE__ && defined __MACH__)
     // If arguments given in the wrong order, swap them.
     if (argc > 1 && !strcmp(argv[1], "--no-auto-exit")) {
@@ -42,10 +45,10 @@ static void initGlobal(int argc, char *argv[])
     // Windows kindly opens a terminal for us. (1 == stdout)
     if (!isatty(1))
         spawnTerminal(argc, argv);
-
     // Check for --no-auto-exit
     if (argv[2] != NULL && (!strcmp(argv[2], "--no-auto-exit")))
-        REQUIRE_GETCHAR = true;
+        requireGetchar(1);
+
 #endif
 
     clearScreen();
@@ -115,7 +118,7 @@ static int cleanup(int exitstatus, struct datastruct *Data, struct charstruct *P
         Player = NULL;
     }
 
-    if (REQUIRE_GETCHAR && exitstatus != EXIT_SUCCESS) {
+    if (requireGetchar(0) && exitstatus != EXIT_SUCCESS) {
         puts("Press any key to continue...\n");
         getchar();
     }
@@ -218,3 +221,13 @@ static void spawnTerminal(int argc, char *argv[])
     exit(EXIT_NOTINTERACTIVE);
 }
 #endif
+
+bool requireGetchar(bool set)
+{
+    static bool requiregetchar;
+    if (set == true)
+        requiregetchar = true;
+    return requiregetchar;
+        
+
+}

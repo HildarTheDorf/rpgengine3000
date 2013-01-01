@@ -3,11 +3,11 @@
 
 #include "../common.h"
 
-extern bool REQUIRE_GETCHAR;
 static const float PLAYER_VERSION = 0.0;
 
 int mainLoop(const struct datastruct *, struct mapnode *, struct charstruct *);
 void clearScreen(void);
+bool requireGetchar(bool);
 
 // Flushes stdin to the next line or EOF, whichever comes first.
 // Input takes the character you just getchar()'d.
@@ -31,7 +31,7 @@ static inline void * smalloc(size_t size)
     // Panic.
     if (pointer == NULL) { 
         fprintf(stderr, "\n***CRITICAL ERROR: Could not allocate %zu bytes of memory!***\n", size);
-        if (REQUIRE_GETCHAR)
+        if (requireGetchar(0))
             getchar();
         exit(EXIT_OOM);
     }
