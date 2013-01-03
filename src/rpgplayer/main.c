@@ -179,12 +179,13 @@ void clearScreen(void)
 }
 
 #if defined __unix__ || (defined __APPLE__ && defined __MACH__)
+#include <syslog.h>
 static void spawnTerminal(int argc, char *argv[])
 {
     char* term = getenv("TERM");
-    // If we didn't get a TERM, assume xterm for now, we will try others later.
+    // If we didn't get a TERM (likely, since we aren't already in one), assume xterm for now, we will try others later.
     if (term == NULL)
-        term = "xterm";
+        term = "konsole";
 
     // Set a clearly wrong file name for argv[1] if we didn't get one.
     if (argc == 1 || !strcmp(argv[1], ""))
@@ -196,28 +197,48 @@ static void spawnTerminal(int argc, char *argv[])
     long unsigned argmax = sysconf(_SC_ARG_MAX) / 2;
     char commandline[argmax];
 
-    // 35 = extra overhead in the commandline for the terminal name, and other parts of the (new) command line.
-    if (strlen(argv[0]) + strlen(argv[1]) + 35 > argmax)
+    // 50 = extra overhead in the commandline for the terminal name, and other parts of the (new) command line.
+    if (strlen(argv[0]) + strlen(argv[1]) + 50 > argmax)
         // We can't fit our extra arguments into a command line.
         // Panic.
         exit(EXIT_ARGUMENTS);
 
-    // Make the command line for the new program up. Add --no-auto-exit since the terminal will close on program completion, windows style.
+
+    // New command line #define for multi-string argument, single string for gnome-terminal...
+    #define COMMANDLINE argv[0], argv[1], "--no-auto-exit"
     sprintf(commandline, "%s %s --no-auto-exit", argv[0], argv[1]);
 
-    // Try some common "pretty" terminals rather than the ugly xterm, which often ends up the 'default'.
+
+    // OSX Terminal. Be nice if someone could tell me if this actually works.
+    #if defined __APPLE__ && defined __MACH__
+    execlp("open", "open", "-a", "/Applications/Terminal.app", COMMANDLINE, NULL);
+    #endif
+    
+
+    // Try some common "pretty" terminals rather than the ugly xterm(and it's brethren such as xterm-color), which often end up 'default' for hysterical raisins.
+    // gnome-terminal insists on a single string for arguments to -e, while konsole insists on separate null-terminated strings...
     if (!strcmp(term, "xterm")) {
         execlp("gnome-terminal", "gnome-terminal", "-e", commandline, NULL);
-        execlp("konsole", "konsole", "-e", commandline, NULL);
-        execlp("urxvt", "urxvt", "-e", commandline, NULL);
+        execlp("konsole", "konsole", "-e", COMMANDLINE, NULL);
+        execlp("urxvt", "urxvt", "-e", COMMANDLINE, NULL);
     }
-    execlp(term, term, "-e", commandline, NULL);
 
-    // $TERM does not point to a valid terminal, or exec failed. One final attempt to launch one.
-    execlp("xterm", "xterm", "-e", commandline, NULL);
+    // gnome-terminal is special.
+    if (!strcmp(term, "gnome-terminal"))
+        execlp(term, term, "-e", commandline, NULL);
 
-    // Everything failed. We can't even report this for obvious reasons.
-    // Give up.
+    // konsole, xterm, etc.
+    execlp(term, term, "-e", COMMANDLINE, NULL);
+
+    // $TERM does not point to a valid terminal (or exec failed). One final attempt to launch one.
+    execlp("xterm", "xterm", "-e", COMMANDLINE, NULL);
+
+    // Everything failed.
+    // Report to syslog and give up.
+    syslog(LOG_MAKEPRI(LOG_USER, LOG_ERR),
+        "<error> Could not spawn terminal for use.");
+    syslog(LOG_MAKEPRI(LOG_USER, LOG_ERR),
+        "<error> Check $PATH is set correctly, a terminal emulator such as xterm is installed, or run from a tty.");
     exit(EXIT_NOTINTERACTIVE);
 }
 #endif

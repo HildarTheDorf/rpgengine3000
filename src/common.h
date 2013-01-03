@@ -22,8 +22,6 @@
 // Converts an extra exit id (e.g. EXIT_EXTRA0) to it's index number (e.g. 0)
 #define exit2Letter(x) x-6
 
-int readfile(FILE * gamefile, struct datastruct *Data);
-
 enum {
     EXIT_ARGUMENTS = 1,
     EXIT_NOGAMEFILE,
@@ -101,5 +99,7 @@ struct charstruct {
 };
 
 static const char MAGIC[] = "GEW\n";
+
+int readfile(FILE * gamefile, struct datastruct *Data);
 
 #endif
