@@ -5,9 +5,10 @@
 
 static const float PLAYER_VERSION = 0.0;
 
-int mainLoop(const struct datastruct *, struct mapnode *, struct charstruct *);
+int  mainLoop(const struct datastruct *, struct mapnode *, struct charstruct *);
 void clearScreen(void);
-bool requireGetchar(bool);
+bool setGetchar(bool);
+bool requireGetchar(void);
 
 // Flushes stdin to the next line or EOF, whichever comes first.
 // Input takes the character you just getchar()'d.
@@ -31,7 +32,7 @@ static inline void * smalloc(size_t size)
     // Panic.
     if (pointer == NULL) { 
         fprintf(stderr, "\n***CRITICAL ERROR: Could not allocate %zu bytes of memory!***\n", size);
-        if (requireGetchar(0))
+        if (requireGetchar())
             getchar();
         exit(EXIT_OOM);
     }

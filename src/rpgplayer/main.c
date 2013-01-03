@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 static void initGlobal(int argc, char *argv[])
 {
 #if defined _WIN32
-    requireGetchar(1);
+    setGetchar(1);
 #endif
 #if defined __unix__ || (defined __APPLE__ && defined __MACH__)
     // If arguments given in the wrong order, swap them.
@@ -47,7 +47,7 @@ static void initGlobal(int argc, char *argv[])
         spawnTerminal(argc, argv);
     // Check for --no-auto-exit
     if (argv[2] != NULL && (!strcmp(argv[2], "--no-auto-exit")))
-        requireGetchar(1);
+        setGetchar(1);
 
 #endif
 
@@ -118,7 +118,7 @@ static int cleanup(int exitstatus, struct datastruct *Data, struct charstruct *P
         Player = NULL;
     }
 
-    if (requireGetchar(0) && exitstatus != EXIT_SUCCESS) {
+    if (requireGetchar() && exitstatus != EXIT_SUCCESS) {
         puts("Press any key to continue...\n");
         getchar();
     }
@@ -222,12 +222,13 @@ static void spawnTerminal(int argc, char *argv[])
 }
 #endif
 
-bool requireGetchar(bool set)
+bool setGetchar(bool set)
 {
-    static bool requiregetchar;
-    if (set == true)
-        requiregetchar = true;
+    requiregetchar = set;
     return requiregetchar;
-        
+}
 
+bool requireGetchar(void)
+{
+    return requiregetchar;
 }
