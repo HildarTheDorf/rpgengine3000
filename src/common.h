@@ -20,7 +20,7 @@
 #define exit2Flag(x) 1<<x
 
 // Converts an extra exit id (e.g. EXIT_EXTRA0) to it's index number (e.g. 0)
-#define exit2Letter(x) x-6
+#define exit2ID(x) x-6
 
 enum {
     EXIT_ARGUMENTS = 1,
@@ -51,14 +51,14 @@ enum {
 // Change EXIT_MAX and an _VALID flag if you add extra exits to the above enum.
 #define EXIT_MAX EXIT_EXTRA1 + 1
 
-static const unsigned short NORTH_VALID  = 0x01;
-static const unsigned short SOUTH_VALID  = 0x02;
-static const unsigned short EAST_VALID   = 0x04;
-static const unsigned short WEST_VALID   = 0x08;
-static const unsigned short UP_VALID     = 0x10;
-static const unsigned short DOWN_VALID   = 0x20;
-static const unsigned short EXTRA0_VALID = 0x40;
-static const unsigned short EXTRA1_VALID = 0x80;
+static const unsigned short NORTH_VALID  = 1 << 0;
+static const unsigned short SOUTH_VALID  = 1 << 1;
+static const unsigned short EAST_VALID   = 1 << 2;
+static const unsigned short WEST_VALID   = 1 << 3;
+static const unsigned short UP_VALID     = 1 << 4;
+static const unsigned short DOWN_VALID   = 1 << 5;
+static const unsigned short EXTRA0_VALID = 1 << 6;
+static const unsigned short EXTRA1_VALID = 1 << 7;
 
 // This struct, and the latter ones, have their contents ordered oddly to save space due to alignment.
 // This is an optimization made for Linux x64, but should be valid on most none-estoric systems.
@@ -95,7 +95,7 @@ struct datastruct {
 
 struct charstruct {
     char Name[LARGEST_CHARACTER_NAME];
-    unsigned Attributes [LARGEST_ATTRIB_NUM];
+    unsigned Attributes[LARGEST_ATTRIB_NUM];
 };
 
 static const char MAGIC[] = "GEW\n";

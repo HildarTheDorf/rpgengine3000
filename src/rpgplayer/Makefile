@@ -1,7 +1,7 @@
 include ../Makefile.inc
 
 CFLAGS	= $(PRJCFLAGS)
-SOURCES	= rpg.c main.c
+SOURCES	= rpg.c main.c combat.c
 OBJS = $(SOURCES:.c=.o)
 
 

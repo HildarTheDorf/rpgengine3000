@@ -49,7 +49,7 @@ static bool handleInput(const struct datastruct *Data, struct mapnode **Location
         break;
     }
     for (unsigned short i = EXIT_EXTRA0; i < EXIT_MAX; ++i)
-        if (input == (*Location)->ExitLetter[exit2Letter(i)])
+        if (input == (*Location)->ExitLetter[exit2ID(i)])
             movePlayer(Location, i);
 
     return false;
@@ -73,7 +73,7 @@ static void printDescription(const struct mapnode *Location)
         printf("Down<D> ");
     for (unsigned short i = EXIT_EXTRA0; i < EXIT_MAX; ++i)
         if (Location->ValidExits & exit2Flag(i))
-            printf("%s<%c> ", Location->ExitName[exit2Letter(i)], toupper(Location->ExitLetter[exit2Letter(i)]));
+            printf("%s<%c> ", Location->ExitName[exit2ID(i)], toupper(Location->ExitLetter[exit2ID(i)]));
 
     puts("\n");
 }
@@ -93,10 +93,5 @@ static bool randomEvent(const struct datastruct *Data, struct mapnode **Location
     double random = (double)rand()/RAND_MAX;
     if (random < 0.5)
         return combat(Data, Player, 1);
-    return false;
-}
-
-static bool combat(const struct datastruct *Data, struct charstruct *Player, unsigned enemyID)
-{
     return false;
 }

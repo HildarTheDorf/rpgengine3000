@@ -5,7 +5,7 @@ DIR2    = rpgcreator
 DIRC    = common
 EXE1	= rpg
 EXE2	= creator
-OBJS1	= $(DIR1)/rpg.o $(DIR1)/main.o
+OBJS1	= $(DIR1)/rpg.o $(DIR1)/main.o $(DIR1)/combat.o
 OBJS2   = $(DIR2)/rpgcreator.o $(DIR2)/main.o $(DIR2)/moc_rpgcreator.o
 OBJSC   = $(DIRC)/files.o
 

@@ -9,6 +9,7 @@ int  mainLoop(const struct datastruct *, struct mapnode *, struct charstruct *);
 void clearScreen(void);
 bool setGetchar(bool);
 bool requireGetchar(void);
+bool combat(const struct datastruct *, struct charstruct *, unsigned);
 
 // Flushes stdin to the next line or EOF, whichever comes first.
 // Input takes the character you just getchar()'d.
